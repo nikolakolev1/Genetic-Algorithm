@@ -1,0 +1,26 @@
+#BlueJ class context
+comment0.params=filename
+comment0.target=void\ run(java.lang.String)
+comment0.text=\n\ Starts\ the\ execution\ of\ the\ GA.\n\ \n\ @param\ filename\ the\ TSP\ file\ instance.\n
+comment1.params=
+comment1.target=void\ initialise()
+comment1.text=\n\ [Task\ 1]\n\ \n\ Initialises\ the\ population.\ The\ population\ is\ represented\ by\ a\n\ 2-dimensional\ array\ attribute\ named\ population.\n
+comment2.params=
+comment2.target=void\ evaluate()
+comment2.text=\n\ [Task\ 2]\n\ \n\ Calculates\ the\ fitness\ of\ each\ individual.\n
+comment3.params=parent
+comment3.target=int[]\ mutation(int)
+comment3.text=\n\ [Task\ 3]\n\ \n\ Mutation\ operator.\n\ \n\ @param\ parent\ index\ of\ the\ parent\ individual\ from\ the\ population.\n\ \n\ @return\ the\ offspring\ generated\ by\ mutating\ the\ parent\ individual.\n
+comment4.params=first\ second
+comment4.target=int[][]\ crossover(int,\ int)
+comment4.text=\n\ [Task\ 4]\n\ \n\ Crossover\ operator.\n\ \n\ @param\ first\ index\ of\ the\ first\ parent\ individual\ from\ the\ population.\n\ @param\ second\ index\ of\ the\ second\ parent\ individual\ from\ the\ population.\n\ \n\ @return\ the\ offspring\ generated\ by\ crossing\ over\ the\ parent\ individuals.\n
+comment5.params=
+comment5.target=int\ select()
+comment5.text=\n\ [Task\ 5\ -\ replace\ this\ by\ a\ tournament\ selection]\n\ \n\ Returns\ the\ index\ of\ the\ selected\ parent\ using\ a\ roulette\ wheel.\n\ \n\ @return\ the\ index\ of\ the\ selected\ parent\ using\ a\ roulette\ wheel.\n
+comment6.params=newPopulation\ offspring\ position
+comment6.target=void\ copy(int[][],\ int[],\ int)
+comment6.text=\n\ Copies\ the\ offspring\ array\ into\ the\ new\ population.\n\ \n\ @param\ newPopulation\ the\ new\ GA\ population.\n\ @param\ offspring\ the\ offspring\ to\ copy.\n\ @param\ position\ the\ position\ in\ the\ population\ array.\n
+comment7.params=filename
+comment7.target=void\ load(java.lang.String)
+comment7.text=\n\ Loads\ the\ TSP\ file.\ This\ method\ will\ initialise\ the\ variables\n\ size\ and\ COST.\n
+numComments=8

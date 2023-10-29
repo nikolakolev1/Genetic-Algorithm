@@ -1,0 +1,16 @@
+GA_Pseudocode() {
+	Initialize random population;
+	Evaluate the population;
+
+	for (gen = 0; gen < MAX_GEN; gen++) {
+		selection();
+		crossover();
+		mutation();
+
+		elitism();
+
+		if (terminationConditionMet) break;
+
+		evaluate();
+	}
+}
