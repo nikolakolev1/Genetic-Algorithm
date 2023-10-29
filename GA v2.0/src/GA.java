@@ -18,6 +18,8 @@ import java.util.stream.IntStream;
  *     <li>Improve elitism to allow for more than one elite individual</li>
  *     <li>Add a method that uses a scanner and reads from input to set the switches</li>
  *     <li>Clean up code (refactor, rename methods and vars, add comments, remove junk)</li>
+ *     <li>Implement using a termination condition</li>
+ *     <li>Finish nPointCrossover, linking it with the nPointCrossoverPoints global var </li>
  * </ul>
  */
 public class GA {
@@ -27,14 +29,13 @@ public class GA {
     protected static FITNESS_FUNC fitnessFunc;
     protected static CROSSOVER crossover;
     protected static MUTATION mutation;
+    protected static MIN_MAX minOrMax;
 
 
     // ------------------------------------- Elitism -------------------------------------
     protected static boolean elitism;
-
-    // TODO:
-//    private static ArrayList<Individual> eliteIndividuals = new ArrayList<>();
-//    private static int eliteIndividualsCount = 0;
+    private static ArrayList<Individual> oldPopulationSorted;
+    private static final int eliteIndividualsCount = 3;
 
 
     // ------------------------------------- Tournament sel - Ensure all selected become parents -------------------------------------
@@ -68,17 +69,15 @@ public class GA {
     public static ArrayList<Double> prejudice;
     protected static Individual bestIndividual_EntireRun;
 
-    // TODO:
     private static int nPointCrossoverPoints;
 
 
-    // TODO: fix elitism for tsp with negative fitness
     public static void main(String[] args) {
         try {
-            for (int testNo = 0; testNo < 10; testNo++) {
+            for (int testNo = 0; testNo < 1; testNo++) {
                 // Set all the switches and settings for the GA to run
                 // (I suggest using presets or the setSwitches() and setSettings() methods)
-                Presets.preset("TspTorTspPmxExcNoeTsp");
+                Presets.preset("TspTorTspPmxExcEltMaxTsp");
 
                 // Check if everything is set correctly
                 Check.checkEverything();
@@ -112,17 +111,12 @@ public class GA {
             Individual[] selected = selection();
             population = evolution(selected);
 
-            if (elitism) {
-                int index = (int) (Math.random() * POPULATION_SIZE);
-                if (fitness(population[index]) < fitness(bestIndividual_EntireRun)) {
-                    population[index] = bestIndividual_EntireRun.copyItself();
-                }
-            }
+            if (elitism) reintroduceElite();
 
             evaluate();
 
             recordBestIndividual_EntireRun();
-            Print.generationStats(gen + 1);
+//            Print.generationStats(gen + 1);
 
             if (usingTerminationCondition && terminationConditionMet) break;
         }
@@ -130,7 +124,7 @@ public class GA {
 
     private static void test() {
         TSP.loadMatrix("tspFiles/groetschel.tsp");
-        setSwitches(INDIVIDUAL_TYPE.tspIntArray, SELECTION.Tournament, FITNESS_FUNC.Tsp, CROSSOVER.PMX_Tsp, MUTATION.Exchange_Tsp, true);
+        setSwitches(INDIVIDUAL_TYPE.tspIntArray, SELECTION.Tournament, FITNESS_FUNC.Tsp, CROSSOVER.PMX_Tsp, MUTATION.Exchange_Tsp, true, MIN_MAX.Min);
         setSettings(TSP.SIZE, 800, 20, 20, 0.95, 0.00);
     }
 
@@ -141,13 +135,15 @@ public class GA {
                                       FITNESS_FUNC fitnessFunction,
                                       CROSSOVER crossover,
                                       MUTATION mutation,
-                                      boolean elitism) {
+                                      boolean elitism,
+                                      MIN_MAX minOrMax) {
         GA.individualType = individualType;
         GA.selection = selection;
         GA.fitnessFunc = fitnessFunction;
         GA.crossover = crossover;
         GA.mutation = mutation;
         GA.elitism = elitism;
+        GA.minOrMax = minOrMax;
 
         if (fitnessFunction == FITNESS_FUNC.QuadEquationBoolArray) {
             if (Equation.valuesAtPoints == null) Equation.populateValuesAtPoints();
@@ -182,7 +178,10 @@ public class GA {
     private static void initialise() {
         population = randomPopulation(); // create a random population
         fitness = new double[POPULATION_SIZE]; // initialise the fitness array
+
         bestIndividual_EntireRun = population[0]; // initialise the best individual
+
+        if (elitism) oldPopulationSorted = new ArrayList<>();
     }
 
     private static Individual[] randomPopulation() {
@@ -246,24 +245,9 @@ public class GA {
             fitness[i] = fitness(population[i]);
         }
 
-//        if (elitism) trackElite();
+        if (elitism) recordElite();
     }
 
-//    private static void trackElite() {
-//        double[] fitnessTemp = fitness.clone();
-//        Arrays.sort(fitnessTemp); //TODO: see if you should sort in ascending or descending order
-//        ArrayList<Integer> visited = new ArrayList<>();
-//
-//        for (int i = 0; i < eliteIndividualsCount; i++) {
-//            for (int j = 0; j < POPULATION_SIZE; j++) {
-//                if (fitnessTemp[i] == fitness[j] && !visited.contains(j)) {
-//                    eliteIndividuals.add(population[j]);
-//                    visited.add(j);
-//                    break;
-//                }
-//            }
-//        }
-//    }
 
     protected static double fitness(Individual individual) {
         switch (fitnessFunc) {
@@ -358,10 +342,10 @@ public class GA {
     }
 
     protected static double populationBestFitness() {
-        double bestFitness = 0.0;
+        double bestFitness = fitness[0];
 
         for (double fitness : fitness) {
-            if (fitness > bestFitness) {
+            if (compareFitness(bestFitness, fitness)) {
                 bestFitness = fitness;
             }
         }
@@ -421,37 +405,28 @@ public class GA {
             selectedIndividuals.add(mostFitInGroup.copyItself());
         }
 
-        // TODO: Move this out of that method so that it is not calculated every time
         prejudice = noPrejudice(selectedIndividuals.size());
         return selectedIndividuals.toArray(new Individual[0]);
     }
 
     private static Individual findBestIndividual(int from, int to) {
-        double bestIndividualFitness = fitness[from];
-        int index = from;
+        int bestInd_index = from;
 
         for (int i = from + 1; i < to; i++) {
-            if (fitness[i] > bestIndividualFitness) {
-                bestIndividualFitness = fitness[i];
-                index = i;
-            }
+            bestInd_index = compareIndividuals(bestInd_index, i);
         }
 
-        return population[index];
+        return population[bestInd_index];
     }
 
     private static Individual findBestIndividual(int[] indexes) {
-        double bestIndividualFitness = fitness[indexes[0]];
-        int index = indexes[0];
+        int bestInd_index = indexes[0];
 
         for (int i = 1; i < indexes.length; i++) {
-            if (fitness[indexes[i]] > bestIndividualFitness) {
-                bestIndividualFitness = fitness[indexes[i]];
-                index = indexes[i];
-            }
+            bestInd_index = compareIndividuals(bestInd_index, indexes[i]);
         }
 
-        return population[index];
+        return population[bestInd_index];
     }
 
     protected static Individual findBestIndividual() {
@@ -559,7 +534,7 @@ public class GA {
         // reset the parents HashSet if using tournament selection
         if (SELECTION.Tournament == selection) {
             everyoneWasParent = false;
-            parents.clear();
+            parents = new HashSet<>();
         }
 
         return newPopulation;
@@ -764,20 +739,69 @@ public class GA {
     }
 
 
+    // ------------------------------------- Elitism -------------------------------------
+    private static void recordElite() {
+        oldPopulationSorted = new ArrayList<>(Arrays.asList(population));
+        oldPopulationSorted.sort((o1, o2) -> {
+            if (minOrMax == MIN_MAX.Min) {
+                return Double.compare(fitness(o1), fitness(o2));
+            } else {
+                return Double.compare(fitness(o2), fitness(o1));
+            }
+        });
+    }
+
+    private static void reintroduceElite() {
+        for (int i = 0; i < eliteIndividualsCount; i++) {
+            // choose a random individual from the new population
+            int index = (int) (Math.random() * POPULATION_SIZE);
+
+            // if the random individual is worse than the elite individual, replace it
+            population[index] = compareIndividuals(population[index], oldPopulationSorted.get(i).copyItself());
+        }
+    }
+
+    // returns the better individual
+    private static Individual compareIndividuals(Individual individual1, Individual individual2) {
+        if (minOrMax == MIN_MAX.Min) {
+            return fitness(individual1) < fitness(individual2) ? individual1 : individual2;
+        } else {
+            return fitness(individual1) > fitness(individual2) ? individual1 : individual2;
+        }
+    }
+
+    // returns the index of the better individual
+    private static int compareIndividuals(int ind1_index, int ind2_index) {
+        if (minOrMax == MIN_MAX.Min) {
+            return fitness[ind1_index] < fitness[ind2_index] ? ind1_index : ind2_index;
+        } else {
+            return fitness[ind1_index] > fitness[ind2_index] ? ind1_index : ind2_index;
+        }
+    }
+
+    // returns true if the contender is better than the current
+    private static boolean compareFitness(double current, double contender) {
+        if (minOrMax == MIN_MAX.Min) {
+            return contender < current;
+        } else {
+            return contender > current;
+        }
+    }
+
+
     // ------------------------------------- Other -------------------------------------
     private static void resetGlobals() {
         population = randPopulation_Normal();
         bestIndividual_EntireRun = population[0];
         terminationConditionMet = false;
         everyoneWasParent = false;
-        parents.clear();
+        parents = new HashSet<>();
     }
 
     private static void recordBestIndividual_EntireRun() {
         Individual bestInGeneration = findBestIndividual();
-        if (fitness(bestInGeneration) > fitness(bestIndividual_EntireRun)) {
-            bestIndividual_EntireRun = bestInGeneration;
-        }
+
+        bestIndividual_EntireRun = compareIndividuals(bestIndividual_EntireRun, bestInGeneration.copyItself());
     }
 
     private static ArrayList<Double> noPrejudice(int populationSize) {

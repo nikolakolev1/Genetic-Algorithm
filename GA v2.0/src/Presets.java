@@ -8,6 +8,7 @@ public class Presets {
      * Crossover (Sin, Npo, Unf, Pmx) +               | Single point, n point, Uniform, PMX
      * Mutation (Unf, Sin, Exc, Inv) +                | Uniform, Single point, Exchange, Inversion
      * Elitism (Elt, Noe) +                           | Elitism, No elitism
+     * Minimization/Maximization (Min, Max) +         | Minimization, Maximization
      * Population size (Sml, Med, Lrg, Gen, Qde, Tsp) | Small, Medium, Large, Many generations, Quadratic eq., TSP
      */
     public static void preset(String letterCode) throws Exception {
@@ -17,6 +18,7 @@ public class Presets {
         CROSSOVER cross;
         MUTATION mutate;
         boolean elite;
+        MIN_MAX minMax;
 
         switch (letterCode.substring(0, 3)) {
             case ("Bol") -> ind = INDIVIDUAL_TYPE.boolArray;
@@ -55,10 +57,15 @@ public class Presets {
             case ("Elt") -> elite = true;
             default -> throw new Exception("Error with the preset");
         }
-
-        GA.setSwitches(ind, sel, fit, cross, mutate, elite);
-
         switch (letterCode.substring(18, 21)) {
+            case ("Min") -> minMax = MIN_MAX.Min;
+            case ("Max") -> minMax = MIN_MAX.Max;
+            default -> throw new Exception("Error with the preset");
+        }
+
+        GA.setSwitches(ind, sel, fit, cross, mutate, elite, minMax);
+
+        switch (letterCode.substring(21, 24)) {
             case ("Sml") -> smallPopulation();
             case ("Med") -> mediumPopulation();
             case ("Lrg") -> largePopulation();
@@ -104,6 +111,6 @@ public class Presets {
             }
         }
 
-        GA.setSettings(size, 200, 10, 150, 0.95, 0.5);
+        GA.setSettings(size, 160, 10, 75, 0.95, 0.5);
     }
 }
