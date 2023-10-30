@@ -1,0 +1,28 @@
+Q1. Is it a good idea to use different crossover and mutation methods at the same time?
+	- Having something like MUTATION.Tsp, which 50% of the time acts like MUTATION.Exchange_Tsp and the other half like MUTATION.Inversion_Tsp, would introduce more variability. That's always welcome when trying to reduce premature convergence
+
+Q2. Ss the parent population supposed to continue on in the next generation?
+	- May do, but better don't.
+
+Q3. Should mutation occur on the offspring or parent level? Is there any difference? 
+	- No real difference, but offspring seems easier.
+
+Q4. Ask if your idea of implementing incest prevention is viable?
+	- Yes, it is. Have a global var in the Individual class to remember the two parents' indexes and make sure that brothers and sisters don't combine to create offsprings next gen. That's a bit primitive, but it is good enough and even like that, it will take a lot of time to implement.
+
+Q5. How would he implement the crowding technique in the TSP genetic algorithm.
+	- Every individual in the TSP I'm tackling is something like a graph with nodes and edges. The nodes are the cities and the edges are the combinations of adjecent cities. The following individual [1, 2, 3, 4] has the following edges:
+
+1 - 2
+2 - 3
+3 - 4
+4 - 1
+
+where 1 - 2 and 2 - 1 are the same.
+
+Sergey would compare how many edges do individuals share and then do something on the individuals that share a lot of edges. Maybe mutate them, check if they differ more - if not, mutate again, if yes - good. Replacing them with randoms may also work
+
+I imagine it like that - when evaluating give every individual a crowdStrength value. The bigger the crowdstrength value, the worse. The individuals with the highest crowdStrength values and lowest fitnesses will have to undergo either mutation or totally get changed.
+
+
+* Additional tips: He suggested that swaping some individuals with random ones on each populaion may also help reduce premature convergence.
