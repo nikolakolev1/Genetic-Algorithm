@@ -6,20 +6,17 @@ import java.util.stream.IntStream;
 // Version: 2.0
 
 /**
- * Issues to be fixed in this version:
- * <ul>
- *     <li>Implement adequate mutation for the TSP problem</li>
- *     <li>Implement another crossover for the TSP problem (only TSP at the moment)</li>
- *     <li>Change the TSP fitness func to be minimal (it is a minimization problem, not maximization)</li>
- * </ul>
  * <p>
  * Issues to be fixed in next version:
  * <ul>
- *     <li>Improve elitism to allow for more than one elite individual</li>
  *     <li>Add a method that uses a scanner and reads from input to set the switches</li>
- *     <li>Clean up code (refactor, rename methods and vars, add comments, remove junk)</li>
  *     <li>Implement using a termination condition</li>
- *     <li>Finish nPointCrossover, linking it with the nPointCrossoverPoints global var </li>
+ *     <li>Finish nPointCrossover, linking it with the nPointCrossoverPoints global var</li>
+ *     <li>Implement MUTATION of type Tsp, which has 50% change of performing Exchange or Inversion mutation</li>
+ *     <li>Write a TSP_GA which has only the fitness, crossover, mutation and others for the TSP</li>
+ *     <li>Work on preventing premature convergence (check out: preselection, crowding, fitness sharing, incest prevention)</li>
+ *     <li>Incest prevention can be implemented through a variable parents[] on an Individual level</li>
+ *     <li>Clean up code (refactor, rename methods and vars, add comments, remove junk)</li>
  * </ul>
  */
 public class GA {
@@ -69,12 +66,15 @@ public class GA {
     public static ArrayList<Double> prejudice;
     protected static Individual bestIndividual_EntireRun;
 
+
+    // ------------------------------------- Other -------------------------------------
     private static int nPointCrossoverPoints;
 
 
+    // ------------------------------------- Methods -------------------------------------
     public static void main(String[] args) {
         try {
-            for (int testNo = 0; testNo < 1; testNo++) {
+            for (int testNo = 0; testNo < 2; testNo++) {
                 // Set all the switches and settings for the GA to run
                 // (I suggest using presets or the setSwitches() and setSettings() methods)
                 Presets.preset("TspTorTspPmxExcEltMaxTsp");
@@ -105,23 +105,26 @@ public class GA {
      * 3. Mutation
      * 4. Elitism
      * 5. Evaluate
+     * 6. Termination check
      */
     private static void runGA() {
         for (int gen = 0; gen < MAX_GENERATION; gen++) {
-            Individual[] selected = selection();
-            population = evolution(selected);
+            Individual[] selected = selection(); // selection
+            population = evolution(selected); // crossover and mutation
 
-            if (elitism) reintroduceElite();
+            if (elitism) reintroduceElite(); // elitism
 
             evaluate();
 
+            // Must do this at the end of each generation
             recordBestIndividual_EntireRun();
-//            Print.generationStats(gen + 1);
+            Print.generationStats(gen + 1);
 
-            if (usingTerminationCondition && terminationConditionMet) break;
+            if (usingTerminationCondition && terminationConditionMet) break; // termination
         }
     }
 
+    // For debugging purposes
     private static void test() {
         TSP.loadMatrix("tspFiles/groetschel.tsp");
         setSwitches(INDIVIDUAL_TYPE.tspIntArray, SELECTION.Tournament, FITNESS_FUNC.Tsp, CROSSOVER.PMX_Tsp, MUTATION.Exchange_Tsp, true, MIN_MAX.Min);
@@ -145,6 +148,7 @@ public class GA {
         GA.elitism = elitism;
         GA.minOrMax = minOrMax;
 
+        // variables that must be set, depending on the switches
         if (fitnessFunction == FITNESS_FUNC.QuadEquationBoolArray) {
             if (Equation.valuesAtPoints == null) Equation.populateValuesAtPoints();
         } else if (fitnessFunc == FITNESS_FUNC.Tsp) {
@@ -181,7 +185,7 @@ public class GA {
 
         bestIndividual_EntireRun = population[0]; // initialise the best individual
 
-        if (elitism) oldPopulationSorted = new ArrayList<>();
+        if (elitism) oldPopulationSorted = new ArrayList<>(); // keep track of the best parents if using elitism
     }
 
     private static Individual[] randomPopulation() {
@@ -193,6 +197,7 @@ public class GA {
                 return randPopulation_Tsp();
             }
             default -> {
+                System.out.println("Select a valid individual type");
                 return null;
             }
         }
@@ -215,16 +220,14 @@ public class GA {
         for (int i = 0; i < POPULATION_SIZE; i++) {
             // create an ArrayList with all the cities (in order)
             ArrayList<Integer> individualI = new ArrayList<>();
-            for (int bit = 0; bit < BITS; bit++) {
-                individualI.add(bit);
-            }
+            for (int bit = 0; bit < BITS; individualI.add(bit++)) ;
 
             // shuffle the ArrayList
             Collections.shuffle(individualI);
 
             // convert the ArrayList to int[]
             int[] individualIarr = new int[BITS];
-            for (int bit = 0; bit < BITS; bit++) {
+            for (int bit = 0; bit < BITS; individualIarr[bit] = individualI.get(bit++)) {
                 individualIarr[bit] = individualI.get(bit);
             }
 
@@ -247,7 +250,6 @@ public class GA {
 
         if (elitism) recordElite();
     }
-
 
     protected static double fitness(Individual individual) {
         switch (fitnessFunc) {
@@ -295,6 +297,7 @@ public class GA {
 
         int numberLengthBits = BITS / Equation.NUMBERS_TO_FIND_COUNT;
         int[] numbers = new int[Equation.NUMBERS_TO_FIND_COUNT];
+
         for (int i = 0; i < Equation.NUMBERS_TO_FIND_COUNT; i++) {
             int from = i * numberLengthBits;
             int to = from + numberLengthBits;
@@ -308,6 +311,7 @@ public class GA {
             difference += Math.abs(Equation.valuesAtPoints.get(key) - results.get(key));
         }
 
+        // prevent division by 0
         if (difference == 0) {
             terminationConditionMet = true;
             difference = 1;
@@ -358,7 +362,8 @@ public class GA {
     private static Individual[] selection() {
         switch (selection) {
             case Roulette -> {
-                return rouletteSelect();
+                rouletteSelect();
+                return population;
             }
             case Tournament -> {
                 return tournamentSelect();
@@ -370,8 +375,8 @@ public class GA {
         }
     }
 
-    // only works with positive fitness
-    private static Individual[] rouletteSelect() {
+    // only works with positive fitness (and maximisation problems)
+    private static void rouletteSelect() {
         prejudice = new ArrayList<>();
 
         double cumulative = 0.0;
@@ -381,13 +386,12 @@ public class GA {
             cumulative += fitness(individual) / totalFitness;
             prejudice.add(cumulative);
         }
-
-        return population;
     }
 
     private static Individual[] tournamentSelect() {
         ArrayList<Individual> selectedIndividuals = new ArrayList<>();
 
+        // create a shuffled array of indexes
         int[] shuffledIndexes = IntStream.range(0, POPULATION_SIZE).toArray();
         Random rand = new Random();
         for (int i = 0; i < POPULATION_SIZE; i++) {
@@ -409,6 +413,7 @@ public class GA {
         return selectedIndividuals.toArray(new Individual[0]);
     }
 
+    // using the fitness[] array
     private static Individual findBestIndividual(int from, int to) {
         int bestInd_index = from;
 
@@ -419,6 +424,7 @@ public class GA {
         return population[bestInd_index];
     }
 
+    // using the fitness[] array
     private static Individual findBestIndividual(int[] indexes) {
         int bestInd_index = indexes[0];
 
@@ -429,6 +435,7 @@ public class GA {
         return population[bestInd_index];
     }
 
+    // using the fitness[] array
     protected static Individual findBestIndividual() {
         return findBestIndividual(0, POPULATION_SIZE);
     }
@@ -450,7 +457,7 @@ public class GA {
      * The getParent() method returns a parent based on a prejudice
      */
     private static Individual getParent(Individual[] parentPopulation) {
-        if (selection == SELECTION.Tournament && !everyoneWasParent) {
+        if (selection == SELECTION.Tournament) {
             return getParent_TournamentSel(parentPopulation);
         } else {
             return getParent_Prejudice(parentPopulation);
@@ -458,29 +465,30 @@ public class GA {
     }
 
     private static Individual getParent_TournamentSel(Individual[] parentPopulation) {
-        int upperBound = parentPopulation.length;
+        int randIndex = new Random().nextInt(parentPopulation.length);
 
-        Random rand = new Random();
-        int randIndex = rand.nextInt(upperBound);
-        if (!parents.contains(randIndex)) {
-            parents.add(randIndex);
-            return parentPopulation[randIndex];
+        if (!everyoneWasParent) {
+            if (!parents.contains(randIndex)) {
+                parents.add(randIndex);
+                return parentPopulation[randIndex];
+            }
+
+            int closestIndexUp = closestIndexUp(randIndex, parentPopulation.length);
+            if (closestIndexUp != -1) {
+                parents.add(closestIndexUp);
+                return parentPopulation[closestIndexUp];
+            }
+
+            int closestIndexDown = closestIndexDown(randIndex);
+            if (closestIndexDown != -1) {
+                parents.add(closestIndexDown);
+                return parentPopulation[closestIndexDown];
+            }
+
+            everyoneWasParent = true;
         }
 
-        int closestIndexUp = closestIndexUp(randIndex, upperBound);
-        if (closestIndexUp != -1) {
-            parents.add(closestIndexUp);
-            return parentPopulation[closestIndexUp];
-        }
-
-        int closestIndexDown = closestIndexDown(randIndex);
-        if (closestIndexDown != -1) {
-            parents.add(closestIndexDown);
-            return parentPopulation[closestIndexDown];
-        }
-
-        everyoneWasParent = true;
-        return getParent_Prejudice(parentPopulation);
+        return parentPopulation[randIndex];
     }
 
     private static int closestIndexUp(int index, int upperBound) {
@@ -489,31 +497,28 @@ public class GA {
             else return index;
         }
 
-        // if the index is out of bounds
-        return -1;
+        return -1; // if the index is out of bounds
     }
 
     private static int closestIndexDown(int index) {
-        while (index > -1) {
+        while (index >= 0) {
             if (parents.contains(index)) index--;
             else return index;
         }
 
-        // if the index is out of bounds
-        return -1;
+        return -1; // if the index is out of bounds
     }
 
     private static Individual getParent_Prejudice(Individual[] parentPopulation) {
-
         double rand = Math.random();
-        for (int individual = 0; individual < POPULATION_SIZE; individual++) {
-            if (rand < prejudice.get(individual)) {
-                return parentPopulation[individual];
+        for (int i = 0; i < POPULATION_SIZE; i++) {
+            if (rand < prejudice.get(i)) {
+                return parentPopulation[i];
             }
         }
 
         System.out.println("This line should not be reached, check for errors");
-        return new Individual(individualType, BITS);
+        return null;
     }
 
     private static Individual[] crossover(Individual[] parentPopulation) {
@@ -523,6 +528,7 @@ public class GA {
             Individual parent1 = getParent(parentPopulation);
             Individual parent2 = getParent(parentPopulation);
 
+            // decrease premature convergence
             while (parent1 == parent2) parent2 = getParent(parentPopulation); // make sure the parents are different
 
             Individual[] offsprings = crossoverIndividuals(parent1, parent2);
@@ -555,6 +561,7 @@ public class GA {
                 return crossover_PartiallyMapped_Tsp(parent1.copyItself(), parent2.copyItself());
             }
             default -> {
+                System.out.println("Select a valid crossover method");
                 return null;
             }
         }
@@ -578,7 +585,7 @@ public class GA {
 
         boolean[] parent1_array = parent1_Copy.individualB;
         boolean[] parent2_array = parent2_Copy.individualB;
-        boolean[] temp = parent1_Copy.individualB.clone();
+        boolean[] temp = parent1_array.clone();
 
         points.add(rand.nextInt(0, BITS));
         while (points.size() < nPointCrossoverPoints) {
@@ -660,8 +667,7 @@ public class GA {
         for (int i = 0; i < from; i++) {
             if (youReceived.contains(offspring[i])) {
                 offspring[i] = youGave.get(youReceived.indexOf(offspring[i]));
-                handleDuplicateGenes(offspring, youGave, youReceived, from, to);
-                return;
+                i = 0;
             }
         }
 
@@ -669,8 +675,7 @@ public class GA {
         for (int i = to + 1; i < offspring.length; i++) {
             if (youReceived.contains(offspring[i])) {
                 offspring[i] = youGave.get(youReceived.indexOf(offspring[i]));
-                handleDuplicateGenes(offspring, youGave, youReceived, from, to);
-                return;
+                i = to + 1;
             }
         }
     }
@@ -740,6 +745,7 @@ public class GA {
 
 
     // ------------------------------------- Elitism -------------------------------------
+    // TODO: You were doing code review and you got to here (Elitism and Other sections left)
     private static void recordElite() {
         oldPopulationSorted = new ArrayList<>(Arrays.asList(population));
         oldPopulationSorted.sort((o1, o2) -> {
@@ -761,7 +767,7 @@ public class GA {
         }
     }
 
-    // returns the better individual
+    // returns the better individual (NOT using the fitness[] array)
     private static Individual compareIndividuals(Individual individual1, Individual individual2) {
         if (minOrMax == MIN_MAX.Min) {
             return fitness(individual1) < fitness(individual2) ? individual1 : individual2;
@@ -770,7 +776,7 @@ public class GA {
         }
     }
 
-    // returns the index of the better individual
+    // returns the index of the better individual (using the fitness[] array)
     private static int compareIndividuals(int ind1_index, int ind2_index) {
         if (minOrMax == MIN_MAX.Min) {
             return fitness[ind1_index] < fitness[ind2_index] ? ind1_index : ind2_index;

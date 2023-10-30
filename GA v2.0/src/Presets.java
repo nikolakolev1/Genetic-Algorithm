@@ -111,6 +111,6 @@ public class Presets {
             }
         }
 
-        GA.setSettings(size, 160, 10, 75, 0.95, 0.5);
+        GA.setSettings(size, 16000, 100, 50, 0.9, 0.3);
     }
 }
