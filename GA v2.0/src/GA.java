@@ -19,6 +19,7 @@ import java.util.stream.IntStream;
  *     <li>Clean up code (refactor, rename methods and vars, add comments, remove junk)</li>
  * </ul>
  */
+// TODO: Last time I did a code cleanup/revision, I broke it. Fix it.
 public class GA {
     // ------------------------------------- Switches -------------------------------------
     protected static INDIVIDUAL_TYPE individualType;
