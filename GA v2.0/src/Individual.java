@@ -8,6 +8,7 @@ public class Individual {
     public boolean[] individualB;
     public int[] individualI;
     public int length;
+    public Double fitness;
 
     public Individual(boolean[] individual) {
         individualB = individual;

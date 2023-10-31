@@ -1,0 +1,10 @@
+#BlueJ class context
+comment0.target=FTTx
+comment0.text=\n\ Class\ for\ techno-economic\ analysis.\n\n\ @author\ Fernando\ Otero\n\ @version\ 1.0\n
+comment1.params=
+comment1.target=FTTx()
+comment1.text=\n\ Default\ constructor.\n
+comment2.params=
+comment2.target=double\ npv()
+comment2.text=\n\ Returns\ the\ NPV\ value.\n\ \n\ @return\ the\ NPV\ value.\n
+numComments=3

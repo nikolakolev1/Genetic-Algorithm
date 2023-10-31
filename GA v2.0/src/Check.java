@@ -53,7 +53,7 @@ public class Check {
                 return GA.individualType == INDIVIDUAL_TYPE.boolArray;
             }
             case QuadEquationBoolArray -> {
-                return GA.individualType == INDIVIDUAL_TYPE.boolArray && GA.BITS % Equation.NUMBERS_TO_FIND_COUNT == 0;
+                return GA.individualType == INDIVIDUAL_TYPE.boolArray && GA.BITS % Equation.NUMBERS_TO_FIND.length == 0;
             }
             case Tsp -> {
                 return GA.individualType == INDIVIDUAL_TYPE.tspIntArray;

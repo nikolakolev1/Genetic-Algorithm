@@ -4,7 +4,7 @@
  */
 public class Print {
     // Print the important stats of a particular run
-    public static void shortStats() {
+    public static void shortStats() throws Exception {
         System.out.println("Average fitness last population: " + GA.averageFitness());
         if (!GA.elitism) System.out.println("Best fitness last population: " + GA.populationBestFitness());
         System.out.println("Best fitness entire run: " + GA.fitness(GA.bestIndividual_EntireRun));
@@ -12,26 +12,26 @@ public class Print {
         GA.bestIndividual_EntireRun.print();
     }
 
-    public static void shortStats(int testNumber) {
+    public static void shortStats(int testNumber) throws Exception {
         System.out.println("--------- TEST " + testNumber + " ---------\n");
         shortStats();
         System.out.println();
     }
 
     // Print all the stats of a particular run
-    public static void detailedStats() {
+    public static void detailedStats() throws Exception{
         shortStats();
         settings();
     }
 
-    public static void detailedStats(int testNumber) {
+    public static void detailedStats(int testNumber) throws Exception{
         shortStats(testNumber);
         settings();
         System.out.println();
     }
 
     // Print the fitness of the best individual of a particular generation
-    public static void generationStats(int generation) {
+    public static void generationStats(int generation) throws Exception {
         System.out.println("Generation " + generation + " best individual: " + GA.fitness(GA.findBestIndividual()));
     }
 

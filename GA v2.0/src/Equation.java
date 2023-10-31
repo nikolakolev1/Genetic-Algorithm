@@ -1,15 +1,15 @@
 import java.util.HashMap;
 
 public class Equation {
+    protected static final int[] NUMBERS_TO_FIND = new int[]{3, 0, -4};
     protected static HashMap<Double, Double> valuesAtPoints;
-    protected static final int NUMBERS_TO_FIND_COUNT = 3;
 
     protected static boolean evaluateParameters() {
-        return GA.BITS % NUMBERS_TO_FIND_COUNT == 0;
+        return GA.BITS % NUMBERS_TO_FIND.length == 0;
     }
 
     protected static void populateValuesAtPoints() {
-        valuesAtPoints = quadraticEquationSolver(new int[]{3, 0, -4});
+        valuesAtPoints = quadraticEquationSolver(NUMBERS_TO_FIND);
     }
 
     protected static HashMap<Double, Double> quadraticEquationSolver(int[] abc) {
