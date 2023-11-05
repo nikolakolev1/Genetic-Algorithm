@@ -16,7 +16,9 @@ public class Check {
         if (!checkIndividualAndFitnessMatch()) issue += "The individual type is not adequate for the problem\n";
         if (!checkIndividualAndCrossoverMatch()) issue += "The individual type is not adequate for the crossover\n";
         if (!checkIndividualAndMutationMatch()) issue += "The individual type is not adequate for the mutation\n";
-        if (!checkProblemProvided()) issue += "The problem is not provided";
+        if (!checkProblemProvided()) issue += "The problem is not provided\n";
+        if (!checkMinOrMaxAndFitnessMatch()) issue += "The fitness function is not adequate for the min/max\n";
+        if (!checkMinOrMaxAndSelectionMatch()) issue += "The selection is not adequate for the min/max";
 
         if (!issue.isEmpty()) throw new Exception(issue);
     }
@@ -26,7 +28,8 @@ public class Check {
                 GA.selection != null &&
                 GA.fitnessFunc != null &&
                 GA.crossover != null &&
-                GA.mutation != null;
+                GA.mutation != null &&
+                GA.minOrMax != null;
     }
 
     private static boolean checkPopSizeDivisibleBy4() {
@@ -58,6 +61,9 @@ public class Check {
             case Tsp -> {
                 return GA.individualType == INDIVIDUAL_TYPE.tspIntArray;
             }
+            case FttxNVP -> {
+                return GA.individualType == INDIVIDUAL_TYPE.fttxIntArray;
+            }
             default -> {
                 return false;
             }
@@ -71,6 +77,9 @@ public class Check {
             }
             case PMX_Tsp -> {
                 return GA.individualType == INDIVIDUAL_TYPE.tspIntArray;
+            }
+            case SinglePoint_Fttx -> {
+                return GA.individualType == INDIVIDUAL_TYPE.fttxIntArray;
             }
             default -> {
                 return false;
@@ -86,6 +95,9 @@ public class Check {
             case Exchange_Tsp, Inversion_Tsp -> {
                 return GA.individualType == INDIVIDUAL_TYPE.tspIntArray;
             }
+            case Arithmetic_Fttx -> {
+                return GA.individualType == INDIVIDUAL_TYPE.fttxIntArray;
+            }
             default -> {
                 return false;
             }
@@ -100,8 +112,39 @@ public class Check {
             case Tsp -> {
                 return TSP.costMatrix != null;
             }
+            case FttxNVP -> {
+                return FTTx.households != null && FTTx.imitator != null;
+            }
             default -> {
                 return true;
+            }
+        }
+    }
+
+    private static boolean checkMinOrMaxAndFitnessMatch() {
+        switch (GA.fitnessFunc) {
+            case MostBitsOn, LeastBitsOn, QuadEquationBoolArray, FttxNVP -> {
+                return GA.minOrMax == MIN_MAX.Max;
+            }
+            case Tsp -> {
+                return GA.minOrMax == MIN_MAX.Min;
+            }
+            default -> {
+                return false;
+            }
+        }
+    }
+
+    private static boolean checkMinOrMaxAndSelectionMatch() {
+        switch (GA.selection) {
+            case Roulette -> {
+                return GA.minOrMax == MIN_MAX.Max;
+            }
+            case Tournament -> {
+                return true;
+            }
+            default -> {
+                return false;
             }
         }
     }

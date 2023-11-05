@@ -47,16 +47,16 @@ public class Individual {
         }
     }
 
-    public Individual copyItself() {
+    public Individual copyItself() throws Exception {
         switch (arrayType) {
             case boolArray -> {
                 return new Individual(individualB.clone());
             }
-            case intArray, tspIntArray -> {
+            case intArray, tspIntArray, fttxIntArray -> {
                 return new Individual(individualI.clone());
             }
             default -> {
-                return null;
+                throw new IllegalStateException("Unexpected value: " + arrayType);
             }
         }
     }
@@ -69,13 +69,14 @@ public class Individual {
                 }
                 System.out.println();
             }
-            case intArray, tspIntArray -> {
+            case intArray, tspIntArray, fttxIntArray -> {
                 for (int bit : individualI) {
                     System.out.print(bit + " ");
                 }
                 System.out.println();
             }
             default -> {
+                throw new IllegalStateException("Unexpected value: " + arrayType);
             }
         }
     }

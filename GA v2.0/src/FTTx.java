@@ -9,83 +9,87 @@ import java.util.ArrayList;
  * @author Fernando Otero
  * @version 1.0
  * <p>
- * I (Nikola Kolev) wrote the npv() method.
+ * I (Nikola Kolev) wrote the npv() and loadParameters() methods,
+ * added the filename, maxRolloutPeriod, and budget vars,
+ * and converted everything to static (=> deleted the constructor).
  */
 public class FTTx {
-    // problem parameters
+    protected static String householdsFilename = "files/fttxFiles/households.csv";
+    protected static String parametersFilename = "files/fttxFiles/parameters.csv";
+    protected static final double budget = 100000;
 
+    // problem parameters
     /**
      * Number of areas.
      */
-    private int noOfAreas;
+    protected static int noOfAreas;
 
     /**
      * Length of the study period.
      */
-    private int period;
+    protected static int period;
 
     /**
      * Rental charges per household.
      */
-    private double rental;
+    private static double rental;
 
     /**
      * CAPEX charges. They only occur once per area in
      * the lifetime of the investment.
      */
-    private double capex;
+    private static double capex;
 
     /**
      * OPEX charges.
      */
-    private double opex;
+    private static double opex;
 
     /**
      * The interest rate that will be used for the
      * NPV calculations.
      */
-    private double interest;
+    private static double interest;
+
+    /**
+     * The last year that a roll-out can occur.
+     */
+    protected static int maxRolloutPeriod;
 
     /**
      * The deployment plan. Each cell in the array
      * represents an area and each value the roll-out
      * year for that area.
      */
-    private int[] plan;
+    private static int[] plan;
 
     /**
      * Population (number of households) per area.
      */
-    private Integer[] households;
+    protected static Integer[] households;
 
     /**
      * Imitator percentages per area.
      */
-    private Double[] imitator;
+    protected static Double[] imitator;
 
-    public static void main(String[] args) {
-        FTTx fttx = new FTTx();
-        System.out.println(fttx.npv());
-    }
 
     /**
-     * Default constructor.
+     * Default parameters.
      */
-    public FTTx() {
+    protected static void defaultParams() {
+        // default parameters values
         noOfAreas = 3;
         period = 10;
+        maxRolloutPeriod = period;
         rental = 2;
         capex = 500;
         opex = 200;
         interest = 0.01;
 
-        plan = new int[noOfAreas];
+        // default households and imitator values
         households = new Integer[noOfAreas];
         imitator = new Double[noOfAreas];
-
-        plan[0] = 0;
-        plan[1] = 2;
-        plan[2] = 1;
 
         households[0] = 100;
         households[1] = 100;
@@ -94,6 +98,13 @@ public class FTTx {
         imitator[0] = 0.2;
         imitator[1] = 0.5;
         imitator[2] = 0.2;
+
+        // default plan (individual / solution)
+        plan = new int[noOfAreas];
+
+        plan[0] = 0;
+        plan[1] = 2;
+        plan[2] = 1;
     }
 
     /**
@@ -101,9 +112,14 @@ public class FTTx {
      *
      * @return the NPV value.
      */
-    public double npv() {
+    protected static double npv() {
+        return npv(plan);
+    }
+
+    protected static double npv(int[] plan) {
         Integer[] householdsLeft = households.clone();
         int[] totalCustomers = new int[noOfAreas];
+        double budgetLeft = budget;
 
         double npv = 0;
 
@@ -139,10 +155,45 @@ public class FTTx {
 
                 // add present value to the NPV
                 npv += presentValue;
+
+                // subtract the cash flow from the budget
+                budgetLeft += cashFlow;
+
+                // if the budget is negative, return -1 (invalid solution)
+                if (budgetLeft < 0) return -1;
             }
         }
 
         return npv;
+    }
+
+    protected static void loadParameters() throws Exception {
+        loadParameters(parametersFilename);
+    }
+
+    protected static void loadParameters(String filename) throws Exception {
+        BufferedReader reader = new BufferedReader(new FileReader(filename));
+
+        String line = "";
+
+        while ((line = reader.readLine()) != null) {
+            String[] split = line.split(",");
+
+            switch (split[0]) {
+                case "Number of areas" -> noOfAreas = Integer.parseInt(split[1]);
+                case "Study period" -> period = Integer.parseInt(split[1]);
+                case "Annual rental charges" -> rental = Double.parseDouble(split[1]);
+                case "CAPEX" -> capex = Double.parseDouble(split[1]);
+                case "OPEX" -> opex = Double.parseDouble(split[1]);
+                case "Interest rate" -> interest = Double.parseDouble(split[1]);
+                case "Maximum rollout period" -> maxRolloutPeriod = Integer.parseInt(split[1]);
+                default -> throw new Exception("Error with the parameters file");
+            }
+        }
+    }
+
+    protected static void loadHouseholds() throws IOException {
+        loadHouseholds(householdsFilename);
     }
 
     /**
@@ -150,13 +201,14 @@ public class FTTx {
      *
      * @ param filename the file to load.
      */
-    public void load(String filename) throws IOException {
+    protected static void loadHouseholds(String filename) throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(filename));
+
         ArrayList<Integer> col1 = new ArrayList<>();
         ArrayList<Double> col2 = new ArrayList<>();
-        String line = null;
+
         // skip the first line (column names)
-        reader.readLine();
+        String line = reader.readLine();
 
         while ((line = reader.readLine()) != null) {
             String[] split = line.split(",");
@@ -164,6 +216,7 @@ public class FTTx {
             col1.add(Integer.valueOf(split[0]));
             col2.add(Double.valueOf(split[1]));
         }
+
         noOfAreas = col1.size();
         households = col1.toArray(new Integer[noOfAreas]);
         imitator = col2.toArray(new Double[noOfAreas]);

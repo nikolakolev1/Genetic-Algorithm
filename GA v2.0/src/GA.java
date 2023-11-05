@@ -7,13 +7,11 @@ import java.util.stream.IntStream;
 
 /**
  * <p>
- * Issues to be fixed in next version:
+ * To be fixed || implemented in next version:
  * <ul>
- *     <li>Add a method that uses a scanner and reads from input to set the switches</li>
  *     <li>Implement using a termination condition</li>
  *     <li>Finish nPointCrossover, linking it with the nPointCrossoverPoints global var</li>
  *     <li>Implement MUTATION of type Tsp, which has 50% change of performing Exchange or Inversion mutation</li>
- *     <li>Write a TSP_GA which has only the fitness, crossover, mutation and others for the TSP</li>
  *     <li>Work on preventing premature convergence (check out: preselection, crowding, fitness sharing, incest prevention)</li>
  *     <li>Incest prevention can be implemented through a variable parents[] on an Individual level</li>
  *     <li>Crossover Uniform Simple doesn't give good results for some reason - debug if there is time</li>
@@ -75,25 +73,27 @@ public class GA {
     // ------------------------------------- Methods -------------------------------------
     public static void main(String[] args) {
         try {
-            for (int testNo = 0; testNo < 10; testNo++) {
-                // Set all the switches and settings for the GA to run
-                // (I suggest using presets or the setSwitches() and setSettings() methods)
-                Presets.preset("TspTorTspPmxInvEltMaxTsp");
+            test();
 
-                // Check if everything is set correctly
-                Check.checkEverything();
-
-                // The main algorithm
-                initialise();
-                evaluate();
-
-                // A loop of selection, crossover, mutation and, possibly, elitism (+ evaluation)
-                runGA();
-
-                // Must do this at the end of each test
-                Print.shortStats(testNo + 1);
-                resetGlobals();
-            }
+//            for (int testNo = 0; testNo < 1; testNo++) {
+//                // Set all the switches and settings for the GA to run
+//                // (I suggest using presets or the setSwitches() and setSettings() methods)
+//                Presets.preset("FtxTorNvpFtxAriEltMaxFtx");
+//
+//                // Check if everything is set correctly
+//                Check.checkEverything();
+//
+//                // The main algorithm
+//                initialise();
+//                evaluate();
+//
+//                // A loop of selection, crossover, mutation and, possibly, elitism (+ evaluation)
+//                runGA();
+//
+//                // Must do this at the end of each test
+//                Print.shortStats(testNo + 1);
+//                resetGlobals();
+//            }
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -122,14 +122,37 @@ public class GA {
             Print.generationStats(gen + 1);
 
             if (usingTerminationCondition && terminationConditionMet) break; // termination
+
+            // PLAYING AROUND: decrease the crossover and mutation probabilities
+            testCrossoverMutationProbability(gen);
         }
     }
 
     // For debugging purposes
-    private static void test() {
-        TSP.loadMatrix("tspFiles/groetschel.tsp");
-        setSwitches(INDIVIDUAL_TYPE.tspIntArray, SELECTION.Tournament, FITNESS_FUNC.Tsp, CROSSOVER.PMX_Tsp, MUTATION.Exchange_Tsp, true, MIN_MAX.Min);
-        setSettings(TSP.SIZE, 800, 20, 20, 0.95, 0.00);
+    private static void test() throws Exception {
+        Presets.preset("FtxTorNvpFtxAriEltMaxFtx");
+
+        double fitness1 = FTTx.npv(new int[]{1, 1, 3, 2, 2, 2, 1, 2, 3, 3, 1, 1, 2, 3, 1, 2, 3, 2, 2, 2, 2, 1, 1, 2, 2, 1, 2, 2, 2, 0, 2, 3, 0, 1, 3, 2, 1, 0, 1, 1, 0, 2, 2, 2, 2, 1, 0, 1, 2, 2, 1, 2, 1, 2, 2, 2, 2, 0, 1, 2, 3, 2, 2, 1, 3, 0, 2, 1, 2, 2, 2, 2, 2, 0, 2, 1, 1, 2, 2, 1, 2, 1, 2, 1, 1, 1, 1, 2, 2, 2, 2, 1, 2, 0, 1, 2, 1, 2, 2, 2, 2, 1, 2, 0, 2, 2, 1, 2, 2, 2, 1, 1, 0, 1, 1, 1, 2, 2, 2, 2, 1, 0, 0, 2, 2, 1, 1, 2, 2, 2, 1, 1, 2, 1, 2, 2, 1, 15, 2, 1, 2, 2, 2, 0, 1, 2, 2, 2, 1, 2, 1, 1, 1, 1, 1, 0, 1, 2, 2, 2, 2, 2, 2, 1, 2, 1, 2, 1, 2, 2, 1, 2, 2, 0, 1, 2, 2, 2, 1, 1, 2, 1, 2, 2, 2, 2, 2, 2, 0, 1, 2, 2, 2, 2, 2, 2, 2, 1, 0, 2, 0, 1, 0, 2, 1, 2, 1, 2, 1, 1, 1, 2, 1, 2, 2, 2, 1, 0, 2, 2, 1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1, 2, 1, 1, 0, 2, 1, 0, 2, 2, 1, 1, 2, 2, 1, 2, 1, 1, 1, 2, 2, 2, 1, 0, 1, 2, 1, 2, 1, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 1, 2, 2, 2, 1, 1, 1, 2, 2, 0, 2, 2, 1, 2, 0, 1, 1, 2, 2, 2, 0, 0, 2, 2, 1, 2, 2, 0, 1, 1, 2});
+        double fitness2 = FTTx.npv(new int[]{1, 1, 3, 2, 2, 2, 1, 2, 3, 3, 1, 1, 2, 3, 1, 2, 3, 2, 2, 2, 2, 1, 1, 2, 2, 1, 2, 2, 2, 0, 2, 3, 0, 1, 3, 2, 1, 0, 1, 1, 0, 2, 2, 2, 2, 1, 0, 1, 2, 2, 1, 2, 1, 2, 2, 2, 2, 0, 1, 2, 3, 2, 2, 1, 3, 0, 2, 1, 2, 2, 2, 2, 2, 0, 2, 1, 1, 2, 2, 1, 2, 1, 2, 1, 1, 1, 1, 2, 2, 2, 2, 1, 2, 0, 1, 2, 1, 2, 2, 2, 2, 1, 2, 0, 2, 2, 1, 2, 2, 2, 1, 1, 0, 1, 1, 1, 2, 2, 2, 2, 1, 0, 0, 2, 2, 1, 1, 2, 2, 2, 1, 1, 2, 1, 2, 2, 1, 0, 2, 1, 2, 2, 2, 0, 1, 2, 2, 2, 1, 2, 1, 1, 1, 1, 1, 0, 1, 2, 2, 2, 2, 2, 2, 1, 2, 1, 2, 1, 2, 2, 1, 2, 2, 0, 1, 2, 2, 2, 1, 1, 2, 1, 2, 2, 2, 2, 2, 2, 0, 1, 2, 2, 2, 2, 2, 2, 2, 1, 0, 2, 0, 1, 0, 2, 1, 2, 1, 2, 1, 1, 1, 2, 1, 2, 2, 2, 1, 0, 2, 2, 1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1, 2, 1, 1, 0, 2, 1, 0, 2, 2, 1, 1, 2, 2, 1, 2, 1, 1, 1, 2, 2, 2, 1, 0, 1, 2, 1, 2, 1, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 1, 2, 2, 2, 1, 1, 1, 2, 2, 0, 2, 2, 1, 2, 0, 1, 1, 2, 2, 2, 0, 0, 2, 2, 1, 2, 2, 0, 1, 1, 2});
+        double fitness3 = FTTx.npv(new int[]{1, 1, 2, 1, 1, 2, 2, 2, 2, 2, 1, 1, 2, 2, 1, 2, 2, 2, 1, 2, 2, 1, 1, 2, 2, 1, 2, 2, 1, 0, 2, 2, 0, 1, 2, 1, 1, 0, 1, 2, 0, 2, 2, 2, 2, 1, 0, 1, 2, 2, 1, 2, 2, 2, 2, 2, 2, 0, 1, 1, 2, 2, 1, 1, 2, 0, 2, 1, 2, 2, 2, 2, 1, 0, 2, 2, 1, 2, 1, 1, 2, 1, 2, 2, 1, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 2, 1, 2, 1, 2, 0, 3, 2, 1, 2, 1, 1, 2, 2, 0, 2, 1, 1, 2, 2, 2, 2, 1, 0, 0, 2, 2, 1, 2, 1, 2, 2, 1, 2, 2, 1, 1, 2, 1, 0, 2, 1, 3, 2, 2, 0, 1, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 0, 1, 3, 2, 1, 2, 1, 1, 2, 2, 1, 2, 1, 2, 2, 1, 2, 2, 6, 1, 2, 2, 2, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 0, 1, 2, 2, 2, 2, 2, 2, 1, 1, 0, 2, 0, 1, 7, 2, 1, 2, 1, 2, 1, 1, 2, 2, 1, 2, 2, 2, 1, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 0, 2, 1, 0, 2, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 2, 2, 1, 0, 1, 2, 2, 2, 1, 2, 2, 1, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1, 2, 2, 0, 2, 1, 2, 2, 0, 1, 1, 2, 2, 1, 0, 0, 2, 2, 2, 2, 2, 0, 1, 1, 2});
+        double fitness4 = FTTx.npv(new int[]{1, 1, 2, 1, 1, 2, 2, 2, 2, 2, 1, 1, 2, 3, 1, 2, 2, 2, 1, 2, 2, 1, 1, 2, 2, 1, 2, 2, 2, 11, 1, 2, 0, 1, 2, 1, 1, 12, 1, 2, 0, 2, 2, 2, 2, 1, 13, 1, 2, 2, 1, 2, 2, 2, 2, 2, 2, 0, 1, 1, 2, 2, 1, 1, 2, 0, 2, 1, 2, 2, 2, 2, 1, 0, 2, 1, 1, 2, 2, 1, 2, 1, 2, 2, 1, 1, 2, 2, 2, 1, 2, 1, 2, 14, 1, 2, 1, 2, 1, 1, 2, 1, 2, 0, 3, 1, 1, 2, 2, 2, 2, 2, 12, 2, 2, 1, 2, 2, 1, 2, 1, 0, 14, 2, 5, 1, 1, 1, 2, 2, 1, 2, 2, 1, 1, 2, 1, 14, 2, 1, 12, 1, 2, 6, 2, 2, 2, 2, 2, 2, 1, 2, 1, 1, 1, 11, 2, 2, 2, 1, 2, 1, 2, 2, 2, 1, 2, 1, 2, 3, 1, 2, 2, 7, 1, 2, 2, 2, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 0, 1, 2, 2, 2, 2, 2, 2, 1, 1, 0, 2, 0, 1, 6, 2, 1, 2, 1, 2, 1, 1, 2, 2, 1, 2, 2, 3, 1, 0, 2, 2, 2, 2, 1, 2, 1, 2, 2, 2, 2, 2, 1, 2, 1, 1, 10, 2, 1, 0, 2, 2, 1, 1, 2, 2, 1, 2, 1, 1, 1, 1, 2, 2, 1, 0, 2, 2, 2, 1, 1, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 1, 2, 2, 2, 1, 2, 2, 13, 2, 1, 2, 2, 0, 1, 1, 2, 2, 1, 12, 11, 2, 2, 2, 2, 2, 15, 2, 1, 2});
+        double fitness5 = FTTx.npv(new int[]{1, 1, 2, 1, 1, 2, 2, 2, 2, 2, 1, 1, 2, 3, 1, 2, 2, 2, 1, 2, 2, 1, 1, 2, 2, 1, 2, 2, 2, 0, 1, 2, 0, 1, 2, 1, 1, 0, 1, 2, 0, 2, 2, 2, 2, 1, 0, 1, 2, 2, 1, 2, 2, 2, 2, 2, 2, 0, 1, 1, 2, 2, 1, 1, 2, 0, 2, 1, 2, 2, 2, 2, 1, 0, 2, 1, 1, 2, 2, 1, 2, 1, 2, 2, 1, 1, 2, 2, 2, 1, 2, 1, 2, 0, 1, 2, 1, 2, 1, 1, 2, 1, 2, 0, 3, 1, 1, 2, 2, 2, 2, 2, 0, 2, 2, 1, 2, 2, 1, 2, 1, 0, 0, 2, 5, 1, 1, 1, 2, 2, 1, 2, 2, 1, 1, 2, 1, 0, 2, 1, 0, 1, 2, 6, 2, 2, 2, 2, 2, 2, 1, 2, 1, 1, 1, 0, 2, 2, 2, 1, 2, 1, 2, 2, 2, 1, 2, 1, 2, 3, 1, 2, 2, 7, 1, 2, 2, 2, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 0, 1, 2, 2, 2, 2, 2, 2, 1, 1, 0, 2, 0, 1, 6, 2, 1, 2, 1, 2, 1, 1, 2, 2, 1, 2, 2, 3, 1, 0, 2, 2, 2, 2, 1, 2, 1, 2, 2, 2, 2, 2, 1, 2, 1, 1, 0, 2, 1, 0, 2, 2, 1, 1, 2, 2, 1, 2, 1, 1, 1, 1, 2, 2, 1, 0, 2, 2, 2, 1, 1, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 1, 2, 2, 2, 1, 2, 2, 0, 2, 1, 2, 2, 0, 1, 1, 2, 2, 1, 0, 0, 2, 2, 2, 2, 2, 0, 2, 1, 2});
+
+
+        System.out.println(fitness1 + "\n" + fitness2 + "\n" + fitness3 + "\n" + fitness4 + "\n" + fitness5);
+    }
+
+    private static void testCrossoverMutationProbability(int gen) {
+        if (MAX_GENERATION >= 100) {
+            if (gen == (MAX_GENERATION / 4)) {
+                CROSSOVER_PROBABILITY -= 0.1;
+            } else if (gen == MAX_GENERATION / 2) {
+                CROSSOVER_PROBABILITY /= 2;
+                MUTATION_PROBABILITY = (MUTATION_PROBABILITY * 2 <= 1) ? (MUTATION_PROBABILITY * 2) : 1;
+            } else if (gen == (MAX_GENERATION / 4) * 3) {
+                MUTATION_PROBABILITY = (MUTATION_PROBABILITY + 0.1 <= 1) ? (MUTATION_PROBABILITY + 0.1) : 1;
+            }
+        }
     }
 
 
@@ -140,7 +163,7 @@ public class GA {
                                       CROSSOVER crossover,
                                       MUTATION mutation,
                                       boolean elitism,
-                                      MIN_MAX minOrMax) {
+                                      MIN_MAX minOrMax) throws Exception {
         GA.individualType = individualType;
         GA.selection = selection;
         GA.fitnessFunc = fitnessFunction;
@@ -156,6 +179,15 @@ public class GA {
             if (TSP.costMatrix == null) {
                 if (TSP.filename != null) TSP.loadMatrix(TSP.filename);
                 else TSP.createMatrix();
+            }
+        } else if (fitnessFunc == FITNESS_FUNC.FttxNVP) {
+            if (FTTx.households == null) {
+                if (FTTx.parametersFilename != null) {
+                    FTTx.loadParameters();
+                    FTTx.loadHouseholds();
+                } else {
+                    FTTx.defaultParams();
+                }
             }
         }
     }
@@ -197,6 +229,9 @@ public class GA {
             case tspIntArray -> {
                 return randPopulation_Tsp();
             }
+            case fttxIntArray -> {
+                return randPopulation_Fttx();
+            }
             default -> throw new Exception("Select a valid individual type");
         }
     }
@@ -235,6 +270,22 @@ public class GA {
         return population;
     }
 
+    private static Individual[] randPopulation_Fttx() {
+        Individual[] population = new Individual[POPULATION_SIZE];
+
+        for (int i = 0; i < POPULATION_SIZE; i++) {
+            int[] individualI = new int[FTTx.noOfAreas];
+
+            for (int j = 0; j < individualI.length; j++) {
+                individualI[j] = (int) (Math.random() * (FTTx.maxRolloutPeriod + 1));
+            }
+
+            population[i] = new Individual(individualI);
+        }
+
+        return population;
+    }
+
 
     // ------------------------------------- Fitness functions - Evaluate -------------------------------------
 
@@ -263,6 +314,9 @@ public class GA {
             }
             case Tsp -> {
                 return fitness_Tsp(individual.individualI);
+            }
+            case FttxNVP -> {
+                return fitness_Fttx(individual.individualI);
             }
             default -> throw new Exception("Select a valid fitness function");
         }
@@ -328,6 +382,10 @@ public class GA {
         return fitness;
     }
 
+    private static double fitness_Fttx(int[] individual) {
+        return FTTx.npv(individual);
+    }
+
     private static double totalFitness() {
         double totalFitness = 0.0;
 
@@ -382,7 +440,7 @@ public class GA {
         }
     }
 
-    private static Individual[] tournamentSelect() {
+    private static Individual[] tournamentSelect() throws Exception {
         ArrayList<Individual> selectedIndividuals = new ArrayList<>();
 
         // create a shuffled array of indexes
@@ -540,18 +598,24 @@ public class GA {
     }
 
     private static Individual[] crossoverIndividuals(Individual parent1, Individual parent2) throws Exception {
+        Individual p1copy = parent1.copyItself();
+        Individual p2copy = parent2.copyItself();
+
         switch (crossover) {
             case SinglePoint_Simple -> {
-                return crossover_SinglePoint_Simple(parent1.copyItself(), parent2.copyItself());
+                return crossover_SinglePoint_Simple(p1copy, p2copy);
             }
             case nPoint_Simple -> {
-                return crossover_nPoint_Simple(parent1.copyItself(), parent2.copyItself());
+                return crossover_nPoint_Simple(p1copy, p2copy);
             }
             case Uniform_Simple -> {
-                return crossover_Uniform_Simple(parent1.copyItself(), parent2.copyItself());
+                return crossover_Uniform_Simple(p1copy, p2copy);
             }
             case PMX_Tsp -> {
-                return crossover_PartiallyMapped_Tsp(parent1.copyItself(), parent2.copyItself());
+                return crossover_PartiallyMapped_Tsp(p1copy, p2copy);
+            }
+            case SinglePoint_Fttx -> {
+                return crossover_SinglePoint_Fttx(p1copy, p2copy);
             }
             default -> throw new Exception("Select a valid crossover method");
         }
@@ -670,6 +734,18 @@ public class GA {
         }
     }
 
+    private static Individual[] crossover_SinglePoint_Fttx(Individual parent1_Copy, Individual parent2_Copy) {
+        if (Math.random() < CROSSOVER_PROBABILITY) {
+            int crossoverPoint = (int) (Math.random() * BITS);
+            int[] temp = parent1_Copy.individualI.clone();
+
+            System.arraycopy(parent2_Copy.individualI, crossoverPoint, parent1_Copy.individualI, crossoverPoint, BITS - crossoverPoint);
+            System.arraycopy(temp, crossoverPoint, parent2_Copy.individualI, crossoverPoint, BITS - crossoverPoint);
+        }
+
+        return new Individual[]{parent1_Copy, parent2_Copy};
+    }
+
     private static void mutation(Individual[] offspringPopulation) {
         for (Individual individual : offspringPopulation) {
             if (mutation == MUTATION.Uniform_Bool) mutateUniform(individual.individualB);
@@ -678,6 +754,8 @@ public class GA {
                     case SinglePoint_Bool -> mutationSinglePoint(individual.individualB);
                     case Exchange_Tsp -> mutateExchange(individual.individualI);
                     case Inversion_Tsp -> mutateInversion(individual.individualI);
+                    case Arithmetic_Fttx -> mutateArithmetic(individual.individualI);
+                    default -> throw new IllegalStateException("Unexpected value: " + mutation);
                 }
             }
         }
@@ -731,6 +809,39 @@ public class GA {
         for (int i = 0; i < temp.length; i++) {
             individualI[from + i] = temp[(temp.length - 1) - i];
         }
+    }
+
+    private static void mutateArithmetic(int[] individualI) {
+        double randOperation = Math.random();
+        int randBitIndex = (int) (Math.random() * BITS);
+        int randBit = individualI[randBitIndex];
+        int randNewPeriod = (int) (Math.random() * FTTx.maxRolloutPeriod);
+
+        double addition = 0.2;
+        double subtraction = 0.4;
+        double multiplication = 0.6;
+        double division = 0.8;
+
+        if (randOperation < addition) {
+            if (randBit < FTTx.maxRolloutPeriod) randBit++;
+            else randBit--;
+        } else if (randOperation < subtraction) {
+            if (randBit > 0) randBit--;
+            else randBit++;
+        } else if (randOperation < multiplication) {
+            if (randBit == 0) randBit = 1;
+            else if ((randBit * 2) <= FTTx.maxRolloutPeriod) randBit *= 2;
+            else if (randBit != FTTx.maxRolloutPeriod) randBit += 1;
+            else randBit = 0;
+        } else if (randOperation < division) {
+            if (randBit == 0) randBit = FTTx.maxRolloutPeriod;
+            else if (randBit > 0) randBit /= 2;
+            else randBit = randNewPeriod;
+        } else { // random
+            randBit = randNewPeriod;
+        }
+
+        individualI[randBitIndex] = randBit;
     }
 
 

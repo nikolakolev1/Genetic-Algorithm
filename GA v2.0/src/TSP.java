@@ -12,7 +12,7 @@ public class TSP {
      * and so on...
      */
     protected static int[] costArray = new int[]{2, 7, 4, 11, 1, 17, 11, 3, 4, 9, 4, 13, 12, 3, 5, 7, 2, 14, 5, 4, 22, 15, 6, 8, 16, 10, 18, 1};
-    protected static String filename = "tspFiles/dantzig.tsp"; // groetschel.tsp & dantzig.tsp
+    protected static String filename = "files/tspFiles/dantzig.tsp"; // groetschel.tsp & dantzig.tsp
     protected static int[][] costMatrix; // Either use TspCostArray or TspFilename to create the TspCostMatrix
     protected static int SIZE;
 
