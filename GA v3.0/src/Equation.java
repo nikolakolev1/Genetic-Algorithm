@@ -27,4 +27,16 @@ public class Equation {
 
         return hm;
     }
+
+    protected static int binaryToDecimal(boolean[] binary) {
+        int decimal = 0;
+        boolean negative = false;
+
+        for (int i = 0; i < binary.length; i++) {
+            if (i != 0 && binary[i]) decimal += (int) Math.pow(2, binary.length - i - 1);
+            else if (i == 0) negative = binary[i];
+        }
+
+        return negative ? (decimal * -1) : decimal;
+    }
 }

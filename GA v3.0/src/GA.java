@@ -4,8 +4,8 @@ import java.util.*;
 import java.util.stream.IntStream;
 
 // Author: Nikola Kolev
-// Date: 21.10.2023
-// Version: 2.0
+// Date: 05.11.2023
+// Version: 3.0
 
 /**
  * <p>
@@ -41,11 +41,6 @@ public class GA {
     private static HashSet<Integer> parents = new HashSet<>();
 
 
-    // ------------------------------------- Termination -------------------------------------
-    private static final boolean usingTerminationCondition = false;
-    private static boolean terminationConditionMet = false;
-
-
     // ------------------------------------- Settings -------------------------------------
     /**
      * BITS - number of bits in an individual
@@ -70,6 +65,7 @@ public class GA {
 
     // ------------------------------------- Other -------------------------------------
     private static int nPointCrossoverPoints;
+    private static final double terminationConditionFitness = 0;
 
 
     // ------------------------------------- Methods -------------------------------------
@@ -124,10 +120,11 @@ public class GA {
             recordBestIndividual_EntireRun();
             Print.generationStats(gen + 1);
 
-            if (usingTerminationCondition && terminationConditionMet) break; // termination
+            // Termination condition
+            if (terminationConditionMet()) break;
 
             // PLAYING AROUND: decrease the crossover and mutation probabilities
-            testCrossoverMutationProbability(gen);
+            changeCrossoverMutationProbability(gen);
         }
     }
 
@@ -143,19 +140,6 @@ public class GA {
 
 
         System.out.println(fitness1 + "\n" + fitness2 + "\n" + fitness3 + "\n" + fitness4 + "\n" + fitness5);
-    }
-
-    private static void testCrossoverMutationProbability(int gen) {
-        if (MAX_GENERATION >= 100) {
-            if (gen == (MAX_GENERATION / 4)) {
-                CROSSOVER_PROBABILITY -= 0.1;
-            } else if (gen == MAX_GENERATION / 2) {
-                CROSSOVER_PROBABILITY /= 2;
-                MUTATION_PROBABILITY = (MUTATION_PROBABILITY * 2 <= 1) ? (MUTATION_PROBABILITY * 2) : 1;
-            } else if (gen == (MAX_GENERATION / 4) * 3) {
-                MUTATION_PROBABILITY = (MUTATION_PROBABILITY + 0.1 <= 1) ? (MUTATION_PROBABILITY + 0.1) : 1;
-            }
-        }
     }
 
 
@@ -355,7 +339,7 @@ public class GA {
         for (int i = 0; i < Equation.NUMBERS_TO_FIND.length; i++) {
             int from = i * numberLengthBits;
             int to = from + numberLengthBits;
-            numbers[i] = binaryToDecimal(Arrays.copyOfRange(individual, from, to));
+            numbers[i] = Equation.binaryToDecimal(Arrays.copyOfRange(individual, from, to));
         }
 
         double difference = 0.0;
@@ -458,7 +442,6 @@ public class GA {
             selectedIndividuals.add(mostFitInGroup.copyItself());
         }
 
-        prejudice = noPrejudice(selectedIndividuals.size());
         return selectedIndividuals.toArray(new Individual[0]);
     }
 
@@ -898,13 +881,12 @@ public class GA {
     private static void resetGlobals() {
         population = null;
         fitness = null;
-        prejudice = null;
+        if (selection == SELECTION.Roulette) prejudice = null;
         bestIndividual_EntireRun = null;
 
         oldPopulationSorted = null;
-        everyoneWasParent = false;
+        if (selection == SELECTION.Tournament) everyoneWasParent = false;
         parents = null;
-        terminationConditionMet = false;
     }
 
     private static void recordBestIndividual_EntireRun() throws Exception {
@@ -913,28 +895,30 @@ public class GA {
         bestIndividual_EntireRun = compareIndividuals(bestIndividual_EntireRun, bestInGeneration.copyItself());
     }
 
-    private static ArrayList<Double> noPrejudice(int populationSize) {
-        double equalChances = 1.0 / populationSize;
-        double cumulative = equalChances;
-        ArrayList<Double> equalPrejudice = new ArrayList<>();
-
-        for (int i = 0; i < populationSize; i++) {
-            equalPrejudice.add(cumulative);
-            cumulative += equalChances;
-        }
-
-        return equalPrejudice;
+    private static boolean terminationConditionMet() {
+        if (populationBestFitness() == terminationConditionFitness) {
+            System.out.println("Termination condition met");
+            return true;
+        } else return false;
     }
 
-    protected static int binaryToDecimal(boolean[] binary) {
-        int decimal = 0;
-        boolean negative = false;
+    private static void changeCrossoverMutationProbability(int gen) {
+        if (MAX_GENERATION >= 100) {
+            // 25% - decrease crossover probability
+            if (gen == (MAX_GENERATION / 4)) {
+                CROSSOVER_PROBABILITY = (CROSSOVER_PROBABILITY - 0.1 >= 0) ? (CROSSOVER_PROBABILITY - 0.1) : 0;
+            }
 
-        for (int i = 0; i < binary.length; i++) {
-            if (i != 0 && binary[i]) decimal += (int) Math.pow(2, binary.length - i - 1);
-            else if (i == 0) negative = binary[i];
+            // 50% - decrease crossover probability and increase mutation probability
+            else if (gen == MAX_GENERATION / 2) {
+                CROSSOVER_PROBABILITY /= 2;
+                MUTATION_PROBABILITY = (MUTATION_PROBABILITY * 2 <= 1) ? (MUTATION_PROBABILITY * 2) : 1;
+            }
+
+            // 75% - increase mutation probability
+            else if (gen == (MAX_GENERATION / 4) * 3) {
+                MUTATION_PROBABILITY = (MUTATION_PROBABILITY + 0.1 <= 1) ? (MUTATION_PROBABILITY + 0.1) : 1;
+            }
         }
-
-        return negative ? (decimal * -1) : decimal;
     }
 }
