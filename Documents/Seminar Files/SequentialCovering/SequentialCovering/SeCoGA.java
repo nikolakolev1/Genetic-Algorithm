@@ -55,6 +55,15 @@ public class SeCoGA {
      */
     private Dataset training;
 
+    public static void main(String[] args) {
+        try {
+            SeCoGA seco = new SeCoGA();
+            seco.covering("SequentialCovering/weather.arff");
+        } catch (IOException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
     /**
      * The sequential covering procedure.
      *
@@ -210,9 +219,7 @@ public class SeCoGA {
     /**
      * Point mutation operator.
      *
-     * @param parent        index of the parent individual from the population.
-     * @param newPopulation the new population.
-     * @param current       index of the individual being created in the new population.
+     * @param parent index of the parent individual from the population.
      */
     private boolean[] mutation(int parent) {
         boolean[] offspring = new boolean[BITS];
