@@ -1,13 +1,12 @@
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Random;
 
 /**
  * Sequential covering procedure that uses a GA to create rules.
  *
  * @author Fernando Otero
- * @version 1.0
+ * @version 2.0 (Nikola Kolev version)
  */
 public class SeCoGA {
     /**
@@ -38,22 +37,17 @@ public class SeCoGA {
     /**
      * Random number generation.
      */
-    private Random random = new Random();
+    private final Random random = new Random();
 
     /**
      * The current population.
      */
-    private boolean[][] population;
+    private boolean[][] population = new boolean[POPULATION_SIZE][];
 
     /**
      * Fitness values of each individual of the population.
      */
-    private double[] fitness = new double[POPULATION_SIZE];
-
-    /**
-     * The training data.
-     */
-    private Dataset training;
+    private final double[] fitness = new double[POPULATION_SIZE];
 
     public static void main(String[] args) {
         try {
@@ -69,31 +63,24 @@ public class SeCoGA {
      *
      * @param filename the dataset file name.
      */
-    public void covering(String filename) throws IOException {
-        training = new Dataset();
+    private void covering(String filename) throws IOException {
+        ArrayList<boolean[]> trainingData = Dataset.read(filename);
+        BITS = trainingData.get(0).length;
 
-        ArrayList<boolean[]> data = training.read(filename);
-        BITS = data.get(0).length;
-
-        int minimum = (int) Math.ceil(data.size() * 0.1);
+        int minimum = (int) Math.ceil(trainingData.size() * 0.1);
 
         do {
             // 1) finds a well performing rule using the GA
-            boolean[] best = run(data);
+            boolean[] best = run(trainingData);
 
             // prints the rule
-            System.out.println(training.toString(best));
+            System.out.println(Dataset.toString(best));
 
             // 2) removes covered instances
-            for (Iterator<boolean[]> i = data.iterator(); i.hasNext(); ) {
-                boolean[] instance = i.next();
+            trainingData.removeIf(instance -> covers(best, instance));
 
-                if (training.covers(best, instance)) {
-                    i.remove();
-                }
-            }
             // 3) checks if we have remaining training data
-        } while (data.size() >= minimum);
+        } while (trainingData.size() >= minimum);
     }
 
     // Genetic Algorithm -----------------------------------------------//
@@ -101,16 +88,16 @@ public class SeCoGA {
     /**
      * Starts the execution of the GA.
      */
-    private boolean[] run(ArrayList<boolean[]> data) {
+    private boolean[] run(ArrayList<boolean[]> trainingData) {
         //--------------------------------------------------------------//
         // initialises the population                                   //
         //--------------------------------------------------------------//
         initialise();
 
         //--------------------------------------------------------------//
-        // evaluates the propulation                                    //
+        // evaluates the population                                    //
         //--------------------------------------------------------------//
-        evaluate(data);
+        evaluate(trainingData);
 
         for (int g = 0; g < MAX_GENERATION; g++) {
             //----------------------------------------------------------//
@@ -130,8 +117,7 @@ public class SeCoGA {
 
                     boolean[] offspring = mutation(parent);
                     // copies the offspring to the new population
-                    newPopulation[current] = offspring;
-                    current += 1;
+                    newPopulation[current++] = offspring;
                 }
                 // otherwise we perform a crossover
                 else {
@@ -140,10 +126,8 @@ public class SeCoGA {
 
                     boolean[][] offspring = crossover(first, second);
                     // copies the offspring to the new population
-                    newPopulation[current] = offspring[0];
-                    current += 1;
-                    newPopulation[current] = offspring[1];
-                    current += 1;
+                    newPopulation[current++] = offspring[0];
+                    newPopulation[current++] = offspring[1];
                 }
             }
 
@@ -152,7 +136,7 @@ public class SeCoGA {
             //----------------------------------------------------------//
             // evaluates the new population                             //
             //----------------------------------------------------------//
-            evaluate(data);
+            evaluate(trainingData);
         }
 
         // prints the value of the best individual
@@ -168,7 +152,7 @@ public class SeCoGA {
     }
 
     /**
-     * Retuns the index of the selected parent using a roulette wheel.
+     * Returns the index of the selected parent using a roulette wheel.
      *
      * @return the index of the selected parent using a roulette wheel.
      */
@@ -208,12 +192,41 @@ public class SeCoGA {
      * [Task 1] Initialises the population.
      */
     private void initialise() {
+        for (int i = 0; i < POPULATION_SIZE; i++) {
+            population[i] = new boolean[BITS];
+
+            for (int j = 0; j < BITS; j++) {
+                population[i][j] = random.nextBoolean();
+            }
+        }
     }
 
     /**
      * [Task 2] Calculates the fitness of each individual.
      */
-    private void evaluate(ArrayList<boolean[]> data) {
+    private void evaluate(ArrayList<boolean[]> trainingData) {
+        for (int i = 0; i < POPULATION_SIZE; i++) {
+            boolean[] individual = population[i];
+
+            int truePositives = 0;
+            int falsePositives = 0;
+
+            // calculate how many true positives and false positives
+            for (boolean[] instance : trainingData) {
+                if (covers(individual, instance)) {
+                    // use target() to get the target value of the instance
+                    if (target(individual) == target(instance)) {
+                        truePositives++;
+                    } else {
+                        falsePositives++;
+                    }
+                }
+            }
+
+            // calculate the precision (fitness)
+            if (truePositives + falsePositives == 0) fitness[i] = 0;
+            else fitness[i] = (double) truePositives / (truePositives + falsePositives);
+        }
     }
 
     /**
@@ -260,5 +273,14 @@ public class SeCoGA {
         }
 
         return offspring;
+    }
+
+    // -----------------------------------------------------------------//
+    private boolean covers(boolean[] individual, boolean[] instance) {
+        return Dataset.covers(individual, instance);
+    }
+
+    private boolean target(boolean[] encoding) {
+        return Dataset.target(encoding);
     }
 }

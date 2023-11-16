@@ -65,7 +65,7 @@ public class GA {
 
     // ------------------------------------- Other -------------------------------------
     private static int nPointCrossoverPoints;
-    private static final double terminationConditionFitness = 0;
+    private static final double terminationConditionFitness = -1;
 
 
     // ------------------------------------- Methods -------------------------------------
@@ -76,8 +76,7 @@ public class GA {
             for (int testNo = 0; testNo < 1; testNo++) {
                 // Set all the switches and settings for the GA to run
                 // (I suggest using presets or the setSwitches() and setSettings() methods)
-                Presets.preset("TspTorTspPmxInvEltTsp"); // BolTorMboSinUnfEltMed | BolTorLboSinUnfEltMed | BolTorQdeSinUnfEltQde | TspTorTspPmxInvEltTsp | FtxTorNvpFtxAriEltFtx
-
+                Presets.preset("BolTorScoSinUnfEltSco"); // BolTorMboSinUnfEltMed | BolTorLboSinUnfEltMed | BolTorQdeSinUnfEltQde | TspTorTspPmxInvEltTsp | FtxTorNvpFtxAriEltFtx
 
                 // Check if everything is set correctly
                 Check.checkEverything();
@@ -87,7 +86,35 @@ public class GA {
                 evaluate();
 
                 // A loop of selection, crossover, mutation and, possibly, elitism (+ evaluation)
-                runGA();
+                if (fitnessFunc != FITNESS_FUNC.SequentialCovering) runGA();
+
+                    // Temporary
+                else {
+                    int minimum = (int) Math.ceil(SequentialCovering.trainingData.size() * 0.1);
+                    ArrayList<boolean[]> bestIndividuals = new ArrayList<>();
+
+                    do {
+                        // 1) finds a well performing rule using the GA
+                        resetGlobals();
+                        initialise();
+                        evaluate();
+                        runGA();
+
+                        // records the best individual
+                        boolean[] best = bestIndividual_EntireRun.individualB.clone();
+                        bestIndividuals.add(best);
+
+                        // 2) removes covered instances
+                        SequentialCovering.trainingData.removeIf(instance -> Dataset.covers(best, instance));
+
+                        // 3) checks if we have remaining training data
+                    } while (SequentialCovering.trainingData.size() >= minimum);
+
+                    // 4) prints the best individuals
+                    for (boolean[] best : bestIndividuals) {
+                        System.out.println(Dataset.toString(best));
+                    }
+                }
 
                 // Must do this at the end of each test
                 Print.shortStats(testNo + 1);
@@ -118,13 +145,13 @@ public class GA {
 
             // Must do this at the end of each generation
             recordBestIndividual_EntireRun();
-            Print.generationStats(gen + 1);
+            Print.generationStats(gen + 1); // if (fitnessFunc != FITNESS_FUNC.SequentialCovering) Print.generationStats(gen + 1);
 
             // Termination condition
             if (terminationConditionMet()) break;
 
             // PLAYING AROUND: decrease the crossover and mutation probabilities
-            changeCrossoverMutationProbability(gen);
+//            changeCrossoverMutationProbability(gen);
         }
     }
 
@@ -174,6 +201,9 @@ public class GA {
                     FTTx.defaultParams();
                 }
             }
+        } else if (fitnessFunction == FITNESS_FUNC.SequentialCovering) {
+            if (SequentialCovering.filename == null) throw new Exception("Sequential Covering filename not set");
+            else SequentialCovering.setTrainingData();
         }
     }
 
@@ -304,6 +334,9 @@ public class GA {
             case FTTxNVP -> {
                 return fitness_FTTx(individual.individualI);
             }
+            case SequentialCovering -> {
+                return fitness_SequentialCovering(individual.individualB);
+            }
             default -> throw new Exception("Select a valid fitness function");
         }
     }
@@ -364,6 +397,10 @@ public class GA {
 
     private static double fitness_FTTx(int[] individual) {
         return FTTx.npv(individual);
+    }
+
+    private static double fitness_SequentialCovering(boolean[] individual) {
+        return SequentialCovering.fitness(individual);
     }
 
     private static double totalFitness() {
@@ -885,7 +922,7 @@ public class GA {
 
         oldPopulationSorted = null;
         if (selection == SELECTION.Tournament) everyoneWasParent = false;
-        parents = null;
+        parents = new HashSet<>();
     }
 
     private static void recordBestIndividual_EntireRun() throws Exception {

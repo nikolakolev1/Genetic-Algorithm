@@ -55,7 +55,7 @@ public class Check {
 
     private static boolean checkIndividualAndFitnessMatch() {
         switch (GA.fitnessFunc) {
-            case MostBitsOn, LeastBitsOn -> {
+            case MostBitsOn, LeastBitsOn, SequentialCovering -> {
                 return GA.individualType == INDIVIDUAL_TYPE.boolArray;
             }
             case QuadEquationBoolArray -> {
@@ -118,6 +118,9 @@ public class Check {
             case FTTxNVP -> {
                 return FTTx.households != null && FTTx.imitator != null;
             }
+            case SequentialCovering -> {
+                return SequentialCovering.trainingData != null;
+            }
             default -> {
                 return true;
             }
@@ -126,7 +129,7 @@ public class Check {
 
     private static boolean checkMinOrMaxAndFitnessMatch() {
         switch (GA.fitnessFunc) {
-            case MostBitsOn, LeastBitsOn, FTTxNVP -> {
+            case MostBitsOn, LeastBitsOn, FTTxNVP, SequentialCovering -> {
                 return GA.minOrMax == MIN_MAX.Max;
             }
             case QuadEquationBoolArray, Tsp -> {

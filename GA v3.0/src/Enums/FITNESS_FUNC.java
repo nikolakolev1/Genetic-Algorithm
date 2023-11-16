@@ -30,6 +30,12 @@ public enum FITNESS_FUNC {
         public MIN_MAX getMinMax() {
             return MIN_MAX.Max;
         }
+    },
+    SequentialCovering {
+        @Override
+        public MIN_MAX getMinMax() {
+            return MIN_MAX.Max;
+        }
     };
 
     public MIN_MAX getMinMax() throws Exception {

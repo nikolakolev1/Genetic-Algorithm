@@ -6,12 +6,55 @@ import java.util.Arrays;
 import java.util.StringTokenizer;
 
 /**
+ * Sequential covering procedure that uses a GA to create rules.
+ */
+public class SequentialCovering {
+    protected static String filename = "files/sequentialCoveringFiles/weather.arff";
+    protected static ArrayList<boolean[]> trainingData;
+
+    protected static void setTrainingData() throws IOException {
+        trainingData = Dataset.read(filename);
+    }
+
+    protected static double fitness(boolean[] individual) {
+        int truePositives = 0;
+        int falsePositives = 0;
+
+        // calculate how many true positives and false positives
+        for (boolean[] instance : trainingData) {
+            if (covers(individual, instance)) {
+                // use target() to get the target value of the instance
+                if (target(individual) == target(instance)) {
+                    truePositives++;
+                } else {
+                    falsePositives++;
+                }
+            }
+        }
+
+        // calculate the precision (fitness)
+        if (truePositives + falsePositives == 0) return 0;
+        else {
+            return (double) truePositives / (truePositives + falsePositives);
+        }
+    }
+
+    private static boolean covers(boolean[] individual, boolean[] instance) {
+        return Dataset.covers(individual, instance);
+    }
+
+    private static boolean target(boolean[] encoding) {
+        return Dataset.target(encoding);
+    }
+}
+
+/**
  * Class used to read ARFF files.
  *
  * @author Fernando Otero
  * @version 2.0 (Nikola Kolev version)
  */
-public class Dataset {
+class Dataset {
     /**
      * Constant representing an attribute section.
      */
@@ -46,8 +89,8 @@ public class Dataset {
     /**
      * Returns <code>true</code> if the rule covers the specified instance.
      *
-     * @param individual     the rule array.
-     * @param instance the instance array.
+     * @param individual the rule array.
+     * @param instance   the instance array.
      * @return <code>true</code> if the rule covers the instance; <code>false</code>
      * otherwise.
      */

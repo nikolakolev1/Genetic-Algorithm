@@ -7,18 +7,19 @@ public class Presets {
      * <ol>
      *     <li>Individual type (Bol, Int, Tsp, Ftx)          | Binary, Integer, TSP int[], FTTx int[]</li>
      *     <li>Selection type (Rol, Tor)                     | Roulette, Tournament</li>
-     *     <li>Fitness func (Mbo, Lbo, Qde, Tsp, Nvp)        | MostBitsOn, LeastBitsOn, QuadraticEq, TSP, FTTx nvp</li>
+     *     <li>Fitness func (Mbo, Lbo, Qde, Tsp, Nvp, Sco)   | MostBitsOn, LeastBitsOn, QuadraticEq, TSP, FTTx nvp, Sequential Covering</li>
      *     <li>Crossover (Sin, Npo, Unf, Pmx, Ftx)           | Single point (bool), n Point, Uniform, PMX, Single point (int)</li>
      *     <li>Mutation (Unf, Sin, Exc, Inv, Ari)            | Uniform, Single point, Exchange, Inversion, Arithmetic</li>
      *     <li>Elitism (Elt, Noe)                            | Elitism, No elitism</li>
-     *     <li>Pop. size (Sml, Med, Lrg, Gen, Qde, Tsp, Ftx) | Small, Medium, Large, Many gen, Quadratic eq., TSP, FTTx</li>
+     *     <li>Pop. size (Sml, Med, Lrg, Gen, Qde, Tsp, Ftx, Sco) | Small, Medium, Large, Many gen, Quadratic eq., TSP, FTTx, SeCo</li>
      * </ol>
      * <p>
      *     <b>Example:</b> BolTorMboSinUnfEltMed <br>
      *     <b>Example:</b> BolTorLboSinUnfEltMed <br>
      *     <b>Example:</b> BolTorQdeSinUnfEltQde <br>
      *     <b>Example:</b> TspTorTspPmxExcNoeTsp <br>
-     *     <b>Example:</b> FtxTorNvpFtxAriNoeFtx
+     *     <b>Example:</b> FtxTorNvpFtxAriNoeFtx <br>
+     *     <b>Example:</b> BolTorScoSinUnfEltSco
      * </p>
      */
     public static void preset(String letterCode) throws Exception {
@@ -47,6 +48,7 @@ public class Presets {
             case ("Qde") -> fit = FITNESS_FUNC.QuadEquationBoolArray;
             case ("Tsp") -> fit = FITNESS_FUNC.Tsp;
             case ("Nvp") -> fit = FITNESS_FUNC.FTTxNVP;
+            case ("Sco") -> fit = FITNESS_FUNC.SequentialCovering;
             default -> throw new Exception("Error with the preset (fitness function)");
         }
         switch (letterCode.substring(9, 12)) {
@@ -81,6 +83,7 @@ public class Presets {
             case ("Qde") -> qdePopulation();
             case ("Tsp") -> tspPopulation();
             case ("Ftx") -> ftxPopulation();
+            case ("Sco") -> scoPopulation();
             default -> throw new Exception("Error with the preset");
         }
     }
@@ -126,5 +129,10 @@ public class Presets {
     private static void ftxPopulation() throws Exception {
         if (FTTx.noOfAreas == 0) throw new Exception("FTTx not initialised");
         else GA.setSettings(FTTx.noOfAreas, 280, 10, 600, 0.9, 0.5);
+    }
+
+    private static void scoPopulation() {
+        int BITS = SequentialCovering.trainingData.get(0).length;
+        GA.setSettings(BITS, 100, 4, 10, 0.9, 0.2);
     }
 }
