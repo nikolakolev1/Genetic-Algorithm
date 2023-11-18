@@ -269,7 +269,6 @@ public class SeCoGA {
 
             offspring[0][i] = population[first][i];
             offspring[1][i] = population[second][i];
-
         }
 
         return offspring;
