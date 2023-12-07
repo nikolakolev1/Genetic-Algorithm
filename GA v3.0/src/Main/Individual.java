@@ -1,3 +1,5 @@
+package Main;
+
 import Enums.INDIVIDUAL_TYPE;
 
 import java.util.Random;
@@ -24,7 +26,7 @@ public class Individual {
         arrayType = GA.individualType;
     }
 
-    // This constructor doesn't work for the TSP problem
+    // This constructor doesn't work for the Problems.TSP problem
     public Individual(INDIVIDUAL_TYPE arrayType, int BITS) {
         Random rand = new Random();
 
@@ -54,7 +56,7 @@ public class Individual {
             case boolArray -> {
                 return new Individual(individualB.clone());
             }
-            case intArray, tspIntArray, fttxIntArray -> {
+            case intArray, tspIntArray, fttxIntArray, aocIntArray -> {
                 return new Individual(individualI.clone());
             }
             default -> throw new IllegalStateException("Unexpected value: " + arrayType);
@@ -72,6 +74,12 @@ public class Individual {
             case intArray, tspIntArray, fttxIntArray -> {
                 for (int bit : individualI) {
                     System.out.print(bit + " ");
+                }
+                System.out.println();
+            }
+            case aocIntArray -> {
+                for (int bit : individualI) {
+                    System.out.print(bit);
                 }
                 System.out.println();
             }

@@ -1,10 +1,16 @@
+package Main;
+
 import Enums.INDIVIDUAL_TYPE;
 import Enums.MIN_MAX;
 import Enums.SELECTION;
+import Problems.*;
+
+import java.io.File;
+import java.util.Scanner;
 
 /**
  * This class is used to check if ALL the parameters are set correctly,
- * so that the GA can run.
+ * so that the Main.GA can run.
  */
 public class Check {
     public static void checkEverything() throws Exception {
@@ -67,6 +73,9 @@ public class Check {
             case FTTxNVP -> {
                 return GA.individualType == INDIVIDUAL_TYPE.fttxIntArray;
             }
+            case AocDay5 -> {
+                return GA.individualType == INDIVIDUAL_TYPE.aocIntArray;
+            }
             default -> {
                 return false;
             }
@@ -82,7 +91,7 @@ public class Check {
                 return GA.individualType == INDIVIDUAL_TYPE.tspIntArray;
             }
             case SinglePoint_FTTx -> {
-                return GA.individualType == INDIVIDUAL_TYPE.fttxIntArray;
+                return GA.individualType == INDIVIDUAL_TYPE.fttxIntArray || GA.individualType == INDIVIDUAL_TYPE.aocIntArray;
             }
             default -> {
                 return false;
@@ -99,7 +108,7 @@ public class Check {
                 return GA.individualType == INDIVIDUAL_TYPE.tspIntArray;
             }
             case Arithmetic_FTTx -> {
-                return GA.individualType == INDIVIDUAL_TYPE.fttxIntArray;
+                return GA.individualType == INDIVIDUAL_TYPE.fttxIntArray || GA.individualType == INDIVIDUAL_TYPE.aocIntArray;
             }
             default -> {
                 return false;
@@ -121,6 +130,9 @@ public class Check {
             case SequentialCovering -> {
                 return SequentialCovering.trainingData != null;
             }
+            case AocDay5 -> {
+                return true; // I have no time to implement it rignt now
+            }
             default -> {
                 return true;
             }
@@ -132,7 +144,7 @@ public class Check {
             case MostBitsOn, LeastBitsOn, FTTxNVP, SequentialCovering -> {
                 return GA.minOrMax == MIN_MAX.Max;
             }
-            case QuadEquationBoolArray, Tsp -> {
+            case QuadEquationBoolArray, Tsp, AocDay5 -> {
                 return GA.minOrMax == MIN_MAX.Min;
             }
             default -> {

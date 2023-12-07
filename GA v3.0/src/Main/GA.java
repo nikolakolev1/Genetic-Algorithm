@@ -1,4 +1,7 @@
+package Main;
+
 import Enums.*;
+import Problems.*;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -15,7 +18,7 @@ import java.util.stream.IntStream;
  *     <li>Finish nPointCrossover, linking it with the nPointCrossoverPoints global var</li>
  *     <li>Implement MUTATION of type Tsp, which has 50% change of performing Exchange or Inversion mutation</li>
  *     <li>Work on preventing premature convergence (check out: preselection, crowding, fitness sharing, incest prevention)</li>
- *     <li>Incest prevention can be implemented through a variable parents[] on an Individual level</li>
+ *     <li>Incest prevention can be implemented through a variable parents[] on an Main.Individual level</li>
  *     <li>Crossover Uniform Simple doesn't give good results for some reason - debug if there is time</li>
  *     <li>Clean up code (refactor, rename methods and vars, add comments, remove junk)</li>
  * </ul>
@@ -52,7 +55,10 @@ public class GA {
      * </ul>
      * MAX_GENERATION - number of generations the algorithm will run for
      */
-    protected static int BITS, POPULATION_SIZE, TOURNAMENT_SIZE, MAX_GENERATION;
+    public static int BITS;
+    protected static int POPULATION_SIZE;
+    protected static int TOURNAMENT_SIZE;
+    protected static int MAX_GENERATION;
     protected static double CROSSOVER_PROBABILITY, MUTATION_PROBABILITY;
 
 
@@ -71,50 +77,19 @@ public class GA {
     // ------------------------------------- Methods -------------------------------------
     public static void main(String[] args) {
         try {
-//            test();
-
             for (int testNo = 0; testNo < 1; testNo++) {
-                // Set all the switches and settings for the GA to run
+                // Set all the switches and settings for the Main.GA to run
                 // (I suggest using presets or the setSwitches() and setSettings() methods)
-                Presets.preset("BolTorScoSinUnfEltSco"); // BolTorMboSinUnfEltMed | BolTorLboSinUnfEltMed | BolTorQdeSinUnfEltQde | TspTorTspPmxInvEltTsp | FtxTorNvpFtxAriEltFtx
+                Presets.preset("AocTorAocFtxAriEltAoc"); // BolTorMboSinUnfEltMed | BolTorLboSinUnfEltMed | BolTorQdeSinUnfEltQde | TspTorTspPmxInvEltTsp | FtxTorNvpFtxAriEltFtx
 
-                // Check if everything is set correctly
+                // Main.Check if everything is set correctly
                 Check.checkEverything();
 
                 // The main algorithm
                 initialise();
                 evaluate();
 
-                // A loop of selection, crossover, mutation and, possibly, elitism (+ evaluation)
-                if (fitnessFunc != FITNESS_FUNC.SequentialCovering) runGA();
-
-                    // Temporary
-                else {
-                    int minimum = (int) Math.ceil(SequentialCovering.trainingData.size() * 0.1);
-                    ArrayList<boolean[]> bestIndividuals = new ArrayList<>();
-
-                    do {
-                        // 1) finds a well performing rule using the GA
-                        resetGlobals();
-                        initialise();
-                        evaluate();
-                        runGA();
-
-                        // records the best individual
-                        boolean[] best = bestIndividual_EntireRun.individualB.clone();
-                        bestIndividuals.add(best);
-
-                        // 2) removes covered instances
-                        SequentialCovering.trainingData.removeIf(instance -> Dataset.covers(best, instance));
-
-                        // 3) checks if we have remaining training data
-                    } while (SequentialCovering.trainingData.size() >= minimum);
-
-                    // 4) prints the best individuals
-                    for (boolean[] best : bestIndividuals) {
-                        System.out.println(Dataset.toString(best));
-                    }
-                }
+                runGA();
 
                 // Must do this at the end of each test
                 Print.shortStats(testNo + 1);
@@ -122,11 +97,12 @@ public class GA {
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());
+            e.printStackTrace();
         }
     }
 
     /**
-     * Run the GA for a given number of generations
+     * Run the Main.GA for a given number of generations
      * 1. Selection
      * 2. Crossover
      * 3. Mutation
@@ -145,7 +121,7 @@ public class GA {
 
             // Must do this at the end of each generation
             recordBestIndividual_EntireRun();
-            Print.generationStats(gen + 1); // if (fitnessFunc != FITNESS_FUNC.SequentialCovering) Print.generationStats(gen + 1);
+            Print.generationStats(gen + 1); // if (fitnessFunc != FITNESS_FUNC.Problems.SequentialCovering) Main.Print.generationStats(gen + 1);
 
             // Termination condition
             if (terminationConditionMet()) break;
@@ -204,6 +180,9 @@ public class GA {
         } else if (fitnessFunction == FITNESS_FUNC.SequentialCovering) {
             if (SequentialCovering.filename == null) throw new Exception("Sequential Covering filename not set");
             else SequentialCovering.setTrainingData();
+        } else if (fitnessFunction == FITNESS_FUNC.AocDay5) {
+            if (AocDay5.filename == null) throw new Exception("AocDay5 filename not set");
+            else AocDay5.loadData(AocDay5.filename);
         }
     }
 
@@ -246,6 +225,9 @@ public class GA {
             }
             case fttxIntArray -> {
                 return randPopulation_FTTx();
+            }
+            case aocIntArray -> {
+                return randPopulation_AOC();
             }
             default -> throw new Exception("Select a valid individual type");
         }
@@ -302,6 +284,25 @@ public class GA {
         return population;
     }
 
+    private static Individual[] randPopulation_AOC() {
+        Individual[] population = new Individual[POPULATION_SIZE];
+
+        Random random = new Random();
+
+        for (int i = 0; i < POPULATION_SIZE; i++) {
+            int rangeIndex = random.nextInt(AocDay5.seedRanges.size());
+
+            long start = AocDay5.seedRanges.get(rangeIndex).seedRangeStart();
+            long finish = start + AocDay5.seedRanges.get(rangeIndex).seedRangeLength();
+
+            long individual = random.nextLong(start, finish);
+
+            population[i] = new Individual(AocDay5.convertLongToIntArr(individual, BITS));
+        }
+
+        return population;
+    }
+
 
     // ------------------------------------- Fitness functions - Evaluate -------------------------------------
 
@@ -336,6 +337,9 @@ public class GA {
             }
             case SequentialCovering -> {
                 return fitness_SequentialCovering(individual.individualB);
+            }
+            case AocDay5 -> {
+                return fitness_AocDay5(individual.individualI);
             }
             default -> throw new Exception("Select a valid fitness function");
         }
@@ -401,6 +405,13 @@ public class GA {
 
     private static double fitness_SequentialCovering(boolean[] individual) {
         return SequentialCovering.fitness(individual);
+    }
+
+    private static double fitness_AocDay5(int[] individual) {
+        long l = AocDay5.convertIntArrToLong(individual);
+
+        if (AocDay5.checkRangesContain(l)) return AocDay5.mapSeedToLocation(l);
+        else return Double.MAX_VALUE;
     }
 
     private static double totalFitness() {
@@ -770,7 +781,7 @@ public class GA {
                     case SinglePoint_Bool -> mutationSinglePoint(individual.individualB);
                     case Exchange_Tsp -> mutateExchange(individual.individualI);
                     case Inversion_Tsp -> mutateInversion(individual.individualI);
-                    case Arithmetic_FTTx -> mutateArithmetic(individual.individualI);
+                    case Arithmetic_FTTx -> mutateArithmeticFTTx(individual.individualI);
                     default -> throw new IllegalStateException("Unexpected value: " + mutation);
                 }
             }
@@ -792,7 +803,7 @@ public class GA {
         individualB[mutationPoint] = !individualB[mutationPoint];
     }
 
-    // (for TSP)
+    // (for Problems.TSP)
     private static void mutateExchange(int[] individualI) {
         // choose two random bits
         int bit1 = (int) (Math.random() * BITS);
@@ -804,7 +815,7 @@ public class GA {
         individualI[bit2] = temp;
     }
 
-    // (for TSP)
+    // (for Problems.TSP)
     private static void mutateInversion(int[] individualI) {
         // choose two random bits
         int from = (int) (Math.random() * BITS);
@@ -827,7 +838,7 @@ public class GA {
         }
     }
 
-    private static void mutateArithmetic(int[] individualI) {
+    private static void mutateArithmeticFTTx(int[] individualI) {
         double randOperation = Math.random();
         int randBitIndex = (int) (Math.random() * BITS);
         int randBit = individualI[randBitIndex];

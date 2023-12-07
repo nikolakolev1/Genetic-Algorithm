@@ -1,3 +1,5 @@
+package Problems;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -15,14 +17,14 @@ import java.util.ArrayList;
  */
 public class FTTx {
     protected static String householdsFilename = "files/fttxFiles/households.csv";
-    protected static String parametersFilename = "files/fttxFiles/parameters.csv";
+    public static String parametersFilename = "files/fttxFiles/parameters.csv";
     protected static final double budget = 100000;
 
     // problem parameters
     /**
      * Number of areas.
      */
-    protected static int noOfAreas;
+    public static int noOfAreas;
 
     /**
      * Length of the study period.
@@ -54,7 +56,7 @@ public class FTTx {
     /**
      * The last year that a roll-out can occur.
      */
-    protected static int maxRolloutPeriod;
+    public static int maxRolloutPeriod;
 
     /**
      * The deployment plan. Each cell in the array
@@ -66,18 +68,18 @@ public class FTTx {
     /**
      * Population (number of households) per area.
      */
-    protected static Integer[] households;
+    public static Integer[] households;
 
     /**
      * Imitator percentages per area.
      */
-    protected static Double[] imitator;
+    public static Double[] imitator;
 
 
     /**
      * Default parameters.
      */
-    protected static void defaultParams() {
+    public static void defaultParams() {
         // default parameters values
         noOfAreas = 3;
         period = 10;
@@ -116,7 +118,7 @@ public class FTTx {
         return npv(plan);
     }
 
-    protected static double npv(int[] plan) {
+    public static double npv(int[] plan) {
         Integer[] householdsLeft = households.clone();
         int[] totalCustomers = new int[noOfAreas];
         double budgetLeft = budget;
@@ -167,7 +169,7 @@ public class FTTx {
         return npv;
     }
 
-    protected static void loadParameters() throws Exception {
+    public static void loadParameters() throws Exception {
         loadParameters(parametersFilename);
     }
 
@@ -192,13 +194,14 @@ public class FTTx {
         }
     }
 
-    protected static void loadHouseholds() throws IOException {
+    public static void loadHouseholds() throws IOException {
         loadHouseholds(householdsFilename);
     }
 
     /**
      * Loads a csv file in memory, skipping the first line (column names).
      * <p>
+     *
      * @ param filename the file to load.
      */
     protected static void loadHouseholds(String filename) throws IOException {

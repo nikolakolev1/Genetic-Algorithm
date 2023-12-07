@@ -1,9 +1,11 @@
+package Main;
+
 /**
  * The print class is used to help visualize the results of the genetic algorithm.
  * It is not necessary for the algorithm to run, but it is useful to see the results.
  */
 public class Print {
-    // Print the important stats of a particular run
+    // Main.Print the important stats of a particular run
     public static void shortStats() throws Exception {
         System.out.println("Average fitness last population: " + GA.averageFitness());
         if (!GA.elitism) System.out.println("Best fitness last population: " + GA.populationBestFitness());
@@ -18,7 +20,7 @@ public class Print {
         System.out.println();
     }
 
-    // Print all the stats of a particular run
+    // Main.Print all the stats of a particular run
     public static void detailedStats() throws Exception {
         shortStats();
         settings();
@@ -30,9 +32,9 @@ public class Print {
         System.out.println();
     }
 
-    // Print the fitness of the best individual of a particular generation
+    // Main.Print the fitness of the best individual of a particular generation
     public static void generationStats(int generation) throws Exception {
-        System.out.println("Generation " + generation + " best individual: " + GA.fitness(GA.findBestIndividual()));
+        System.out.println("Generation " + generation + " best individual: " + (long) GA.fitness(GA.findBestIndividual()));
     }
 
     // Visualize the global population (print all individuals' genes)
@@ -53,9 +55,9 @@ public class Print {
         System.out.println();
     }
 
-    // Print the settings of a particular run
+    // Main.Print the settings of a particular run
     public static void settings() {
-        System.out.print("This was a GA using " + GA.selection + " selection and the '" + GA.fitnessFunc + "' fitness function");
+        System.out.print("This was a Main.GA using " + GA.selection + " selection and the '" + GA.fitnessFunc + "' fitness function");
         if (GA.elitism) System.out.println(", with Elitism turned on.");
         else System.out.println(".");
     }

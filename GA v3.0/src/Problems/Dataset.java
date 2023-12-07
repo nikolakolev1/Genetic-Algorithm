@@ -1,3 +1,5 @@
+package Problems;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -6,55 +8,12 @@ import java.util.Arrays;
 import java.util.StringTokenizer;
 
 /**
- * Sequential covering procedure that uses a GA to create rules.
- */
-public class SequentialCovering {
-    protected static String filename = "files/sequentialCoveringFiles/weather.arff";
-    protected static ArrayList<boolean[]> trainingData;
-
-    protected static void setTrainingData() throws IOException {
-        trainingData = Dataset.read(filename);
-    }
-
-    protected static double fitness(boolean[] individual) {
-        int truePositives = 0;
-        int falsePositives = 0;
-
-        // calculate how many true positives and false positives
-        for (boolean[] instance : trainingData) {
-            if (covers(individual, instance)) {
-                // use target() to get the target value of the instance
-                if (target(individual) == target(instance)) {
-                    truePositives++;
-                } else {
-                    falsePositives++;
-                }
-            }
-        }
-
-        // calculate the precision (fitness)
-        if (truePositives + falsePositives == 0) return 0;
-        else {
-            return (double) truePositives / (truePositives + falsePositives);
-        }
-    }
-
-    private static boolean covers(boolean[] individual, boolean[] instance) {
-        return Dataset.covers(individual, instance);
-    }
-
-    private static boolean target(boolean[] encoding) {
-        return Dataset.target(encoding);
-    }
-}
-
-/**
  * Class used to read ARFF files.
  *
  * @author Fernando Otero
  * @version 2.0 (Nikola Kolev version)
  */
-class Dataset {
+public class Dataset {
     /**
      * Constant representing an attribute section.
      */
@@ -94,7 +53,7 @@ class Dataset {
      * @return <code>true</code> if the rule covers the instance; <code>false</code>
      * otherwise.
      */
-    protected static boolean covers(boolean[] individual, boolean[] instance) {
+    public static boolean covers(boolean[] individual, boolean[] instance) {
         int position = 0;
 
         for (int i = 0; i < attributes.size() - 1; i++) {
@@ -122,7 +81,7 @@ class Dataset {
         return true;
     }
 
-    protected static String toString(boolean[] individual) {
+    public static String toString(boolean[] individual) {
         StringBuilder print = new StringBuilder();
         print.append("IF ");
 
@@ -180,7 +139,7 @@ class Dataset {
      * the method.
      *
      * @param input a reader.
-     * @return a <code>Dataset</code> instance containing the contents of the
+     * @return a <code>Problems.Dataset</code> instance containing the contents of the
      * input reader.
      * @throws IOException if an I/O error occurs.
      */

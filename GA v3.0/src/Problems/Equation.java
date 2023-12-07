@@ -1,18 +1,22 @@
+package Problems;
+
+import Main.GA;
+
 import java.util.HashMap;
 
 public class Equation {
-    protected static final int[] NUMBERS_TO_FIND = new int[]{3, 0, -4};
-    protected static HashMap<Double, Double> valuesAtPoints;
+    public static final int[] NUMBERS_TO_FIND = new int[]{3, 0, -4};
+    public static HashMap<Double, Double> valuesAtPoints;
 
-    protected static boolean evaluateParameters() {
+    public static boolean evaluateParameters() {
         return GA.BITS % NUMBERS_TO_FIND.length == 0;
     }
 
-    protected static void populateValuesAtPoints() {
+    public static void populateValuesAtPoints() {
         valuesAtPoints = quadraticEquationSolver(NUMBERS_TO_FIND);
     }
 
-    protected static HashMap<Double, Double> quadraticEquationSolver(int[] abc) {
+    public static HashMap<Double, Double> quadraticEquationSolver(int[] abc) {
         int howManyValues = 10;
         HashMap<Double, Double> hm = new HashMap<>();
 
@@ -28,7 +32,7 @@ public class Equation {
         return hm;
     }
 
-    protected static int binaryToDecimal(boolean[] binary) {
+    public static int binaryToDecimal(boolean[] binary) {
         int decimal = 0;
         boolean negative = false;
 
