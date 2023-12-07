@@ -1,3 +1,7 @@
+package Problems;
+
+import Main.GA;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -11,9 +15,9 @@ public class TSP {
      * - TSPDistances[2] is the distance between city B and city C
      * and so on...
      */
-    protected static int[] costArray = new int[]{2, 7, 4, 11, 1, 17, 11, 3, 4, 9, 4, 13, 12, 3, 5, 7, 2, 14, 5, 4, 22, 15, 6, 8, 16, 10, 18, 1};
-    protected static String filename = "files/tspFiles/dantzig.tsp"; // groetschel.tsp & dantzig.tsp
-    protected static int[][] costMatrix; // Either use TspCostArray or TspFilename to create the TspCostMatrix
+    public static int[] costArray = new int[]{2, 7, 4, 11, 1, 17, 11, 3, 4, 9, 4, 13, 12, 3, 5, 7, 2, 14, 5, 4, 22, 15, 6, 8, 16, 10, 18, 1};
+    public static String filename = "files/tspFiles/dantzig.tsp"; // groetschel.tsp & dantzig.tsp
+    public static int[][] costMatrix; // Either use TspCostArray or TspFilename to create the TspCostMatrix
     protected static int SIZE;
 
     /**
@@ -23,7 +27,7 @@ public class TSP {
      * |AB BB BC|
      * |AA AB AC|
      */
-    protected static void createMatrix() {
+    public static void createMatrix() {
         int matrixSize = 3;
         while (true) {
             double trigSide = matrixSize - 1;
@@ -46,7 +50,7 @@ public class TSP {
     }
 
     // From other file
-    protected static void loadMatrix(String filename) {
+    public static void loadMatrix(String filename) {
         try {
             BufferedReader reader = new BufferedReader(new FileReader(filename));
             String line;
