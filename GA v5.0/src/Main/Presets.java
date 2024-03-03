@@ -17,7 +17,7 @@ public class Presets {
      *     <li>Crossover (Sin, Npo, Unf, Pmx, Ftx)           | Single point (bool), n Point, Uniform, PMX, Single point (int)</li>
      *     <li>Mutation (Unf, Sin, Exc, Inv, Ari)            | Uniform, Single point, Exchange, Inversion, Arithmetic</li>
      *     <li>Elitism (Elt, Noe)                            | Elitism, No elitism</li>
-     *     <li>Pop. size (Sml, Med, Lrg, Gen, Qde, Tsp, Ftx, Sco, Aoc) | Small, Medium, Large, Many gen, Quadratic eq., Problems.TSP, Problems.FTTx, SeCo, AocDay5</li>
+     *     <li>Pop. size (Sml, Med, Lrg, Gen, Qde, Tsp, Ts2, Ftx, Sco, Aoc) | Small, Medium, Large, Many gen, Quadratic eq., Problems.TSP, Problems.FTTx, SeCo, AocDay5</li>
      * </ol>
      * <p>
      *     <b>Example:</b> BolTorMboSinUnfEltMed <br>
@@ -26,7 +26,8 @@ public class Presets {
      *     <b>Example:</b> TspTorTspPmxExcNoeTsp <br>
      *     <b>Example:</b> FtxTorNvpFtxAriNoeFtx <br>
      *     <b>Example:</b> BolTorScoSinUnfEltSco <br>
-     *     <b>Example:</b> AocTorAocFtxAriEltAoc
+     *     <b>Example:</b> AocTorAocFtxAriEltAoc <br>
+     *     <b>Example:</b> TspTorTspPmxExcNoeTs2
      * </p>
      */
     public static void preset(String letterCode) throws Exception {
@@ -91,6 +92,7 @@ public class Presets {
             case ("Gen") -> manyGensPopulation();
             case ("Qde") -> qdePopulation();
             case ("Tsp") -> tspPopulation();
+            case ("Ts2") -> tsp2Population();
             case ("Ftx") -> ftxPopulation();
             case ("Sco") -> scoPopulation();
             case ("Aoc") -> aocPopulation();
@@ -133,7 +135,24 @@ public class Presets {
             }
         }
 
-        GA.setSettings(size, 160, 8, 200, 0.9, 0.25);
+        GA.setSettings(size, 240, 8, 800, 0.9, 0.25);
+    }
+
+    private static void tsp2Population() {
+        int size = 3;
+
+        if (TSP.filename != null) {
+            size = GA.BITS;
+        } else {
+            while (true) {
+                double trigSide = size - 1;
+                double temp = trigSide * ((trigSide / 2) + 0.5);
+                if (temp == TSP.costArray.length) break;
+                else size++;
+            }
+        }
+
+        GA.setSettings(size, 800, 20, 2000, 0.9, 0.25);
     }
 
     private static void ftxPopulation() throws Exception {
@@ -142,7 +161,7 @@ public class Presets {
     }
 
     private static void scoPopulation() {
-        int BITS = SequentialCovering.trainingData.get(0).length;
+        int BITS = SequentialCovering.trainingData.getFirst().length;
         GA.setSettings(BITS, 100, 4, 10, 0.9, 0.2);
     }
 

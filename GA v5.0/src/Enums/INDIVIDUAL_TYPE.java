@@ -18,6 +18,11 @@ public enum INDIVIDUAL_TYPE {
         }
 
         @Override
+        public Individual randomIndividual() {
+            return new Individual(individualType, BITS);
+        }
+
+        @Override
         public void print(Individual individual) {
             for (boolean bit : individual.individualB) {
                 System.out.print(bit ? "1" : "0");
@@ -30,6 +35,11 @@ public enum INDIVIDUAL_TYPE {
         @Override
         public Individual[] randomPopulation() {
             return randPopulation_Normal();
+        }
+
+        @Override
+        public Individual randomIndividual() {
+            return new Individual(individualType, BITS);
         }
 
         @Override
@@ -48,6 +58,25 @@ public enum INDIVIDUAL_TYPE {
         }
 
         @Override
+        public Individual randomIndividual() {
+            // create an ArrayList with all the cities (in order)
+            ArrayList<Integer> individualI = new ArrayList<>();
+
+            int city = 0;
+            while (city < BITS) individualI.add(city++);
+
+            // shuffle the ArrayList
+            Collections.shuffle(individualI);
+
+            // convert the ArrayList to int[]
+            int[] individual = new int[BITS];
+            city = 0;
+            while (city < BITS) individual[city] = individualI.get(city++);
+
+            return new Individual(individual);
+        }
+
+        @Override
         public void print(Individual individual) {
             for (int bit : individual.individualI) {
                 System.out.print(bit + " ");
@@ -63,6 +92,17 @@ public enum INDIVIDUAL_TYPE {
         }
 
         @Override
+        public Individual randomIndividual() {
+            int[] individualI = new int[FTTx.noOfAreas];
+
+            for (int j = 0; j < individualI.length; j++) {
+                individualI[j] = (int) (Math.random() * (FTTx.maxRolloutPeriod + 1));
+            }
+
+            return new Individual(individualI);
+        }
+
+        @Override
         public void print(Individual individual) {
             for (int bit : individual.individualI) {
                 System.out.print(bit + " ");
@@ -75,6 +115,20 @@ public enum INDIVIDUAL_TYPE {
         @Override
         public Individual[] randomPopulation() {
             return randPopulation_AOC();
+        }
+
+        @Override
+        public Individual randomIndividual() {
+            Random random = new Random();
+
+            int rangeIndex = random.nextInt(AocDay5.seedRanges.size());
+
+            long start = AocDay5.seedRanges.get(rangeIndex).seedRangeStart();
+            long finish = start + AocDay5.seedRanges.get(rangeIndex).seedRangeLength();
+
+            long individual = random.nextLong(start, finish);
+
+            return new Individual(AocDay5.convertLongToIntArr(individual, BITS));
         }
 
         @Override
@@ -160,6 +214,10 @@ public enum INDIVIDUAL_TYPE {
         }
 
         return population;
+    }
+
+    public Individual randomIndividual() throws IllegalStateException {
+        throw new IllegalStateException("Not implemented");
     }
 
     public void print(Individual individual) throws IllegalStateException {

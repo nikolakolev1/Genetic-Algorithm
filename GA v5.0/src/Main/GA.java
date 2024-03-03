@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
+import static Main.Check.checkEverything;
+import static Main.Presets.preset;
+
 // Author: Nikola Kolev
 // Date: 05.11.2023
 // Version: 3.0
@@ -78,13 +81,13 @@ public class GA {
     // ------------------------------------- Methods -------------------------------------
     public static void main(String[] args) {
         try {
-            for (int testNo = 0; testNo < 1; testNo++) {
+            for (int testNo = 0; testNo < 10; testNo++) {
                 // Set all the switches and settings for the Main.GA to run
                 // (I suggest using presets or the setSwitches() and setSettings() methods)
-                Presets.preset("BolTorMboSinUnfEltMed"); // BolTorMboSinUnfEltMed | BolTorLboSinUnfEltMed | BolTorQdeSinUnfEltQde | TspTorTspPmxInvEltTsp | FtxTorNvpFtxAriEltFtx | AocTorAocFtxAriEltAoc
+                preset("TspTorTspPmxExcNoeTs2"); // BolTorMboSinUnfEltMed | BolTorLboSinUnfEltMed | BolTorQdeSinUnfEltQde | TspTorTspPmxInvEltTsp | FtxTorNvpFtxAriEltFtx | AocTorAocFtxAriEltAoc
 
-                // Main.Check if everything is set correctly
-                Check.checkEverything();
+                // Call Main.Check.checkEverything if everything is set correctly
+                checkEverything();
 
                 // The main algorithm
                 initialise();
@@ -127,14 +130,18 @@ public class GA {
             // Termination condition
             if (terminationConditionMet()) break;
 
-            // PLAYING AROUND: decrease the crossover and mutation probabilities
-//            changeCrossoverMutationProbability(gen);
+            /*
+             * PLAYING AROUND: decrease crossover, increase mutation, and introduce random individuals
+             * Unfortunately, this doesn't work as well as I thought it would.
+             * I've been playing around with it with the Ts2 population, with the following preset: TspTorTspPmxExcNoeTs2
+             */
+            changeCrossoverMutationProbability(gen);
         }
     }
 
     // For debugging purposes
     private static void test() throws Exception {
-        Presets.preset("FtxTorNvpFtxAriEltMaxFtx");
+        preset("FtxTorNvpFtxAriEltMaxFtx");
 
         double fitness1 = FTTx.npv(new int[]{1, 1, 3, 2, 2, 2, 1, 2, 3, 3, 1, 1, 2, 3, 1, 2, 3, 2, 2, 2, 2, 1, 1, 2, 2, 1, 2, 2, 2, 0, 2, 3, 0, 1, 3, 2, 1, 0, 1, 1, 0, 2, 2, 2, 2, 1, 0, 1, 2, 2, 1, 2, 1, 2, 2, 2, 2, 0, 1, 2, 3, 2, 2, 1, 3, 0, 2, 1, 2, 2, 2, 2, 2, 0, 2, 1, 1, 2, 2, 1, 2, 1, 2, 1, 1, 1, 1, 2, 2, 2, 2, 1, 2, 0, 1, 2, 1, 2, 2, 2, 2, 1, 2, 0, 2, 2, 1, 2, 2, 2, 1, 1, 0, 1, 1, 1, 2, 2, 2, 2, 1, 0, 0, 2, 2, 1, 1, 2, 2, 2, 1, 1, 2, 1, 2, 2, 1, 15, 2, 1, 2, 2, 2, 0, 1, 2, 2, 2, 1, 2, 1, 1, 1, 1, 1, 0, 1, 2, 2, 2, 2, 2, 2, 1, 2, 1, 2, 1, 2, 2, 1, 2, 2, 0, 1, 2, 2, 2, 1, 1, 2, 1, 2, 2, 2, 2, 2, 2, 0, 1, 2, 2, 2, 2, 2, 2, 2, 1, 0, 2, 0, 1, 0, 2, 1, 2, 1, 2, 1, 1, 1, 2, 1, 2, 2, 2, 1, 0, 2, 2, 1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1, 2, 1, 1, 0, 2, 1, 0, 2, 2, 1, 1, 2, 2, 1, 2, 1, 1, 1, 2, 2, 2, 1, 0, 1, 2, 1, 2, 1, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 1, 2, 2, 2, 1, 1, 1, 2, 2, 0, 2, 2, 1, 2, 0, 1, 1, 2, 2, 2, 0, 0, 2, 2, 1, 2, 2, 0, 1, 1, 2});
         double fitness2 = FTTx.npv(new int[]{1, 1, 3, 2, 2, 2, 1, 2, 3, 3, 1, 1, 2, 3, 1, 2, 3, 2, 2, 2, 2, 1, 1, 2, 2, 1, 2, 2, 2, 0, 2, 3, 0, 1, 3, 2, 1, 0, 1, 1, 0, 2, 2, 2, 2, 1, 0, 1, 2, 2, 1, 2, 1, 2, 2, 2, 2, 0, 1, 2, 3, 2, 2, 1, 3, 0, 2, 1, 2, 2, 2, 2, 2, 0, 2, 1, 1, 2, 2, 1, 2, 1, 2, 1, 1, 1, 1, 2, 2, 2, 2, 1, 2, 0, 1, 2, 1, 2, 2, 2, 2, 1, 2, 0, 2, 2, 1, 2, 2, 2, 1, 1, 0, 1, 1, 1, 2, 2, 2, 2, 1, 0, 0, 2, 2, 1, 1, 2, 2, 2, 1, 1, 2, 1, 2, 2, 1, 0, 2, 1, 2, 2, 2, 0, 1, 2, 2, 2, 1, 2, 1, 1, 1, 1, 1, 0, 1, 2, 2, 2, 2, 2, 2, 1, 2, 1, 2, 1, 2, 2, 1, 2, 2, 0, 1, 2, 2, 2, 1, 1, 2, 1, 2, 2, 2, 2, 2, 2, 0, 1, 2, 2, 2, 2, 2, 2, 2, 1, 0, 2, 0, 1, 0, 2, 1, 2, 1, 2, 1, 1, 1, 2, 1, 2, 2, 2, 1, 0, 2, 2, 1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1, 2, 1, 1, 0, 2, 1, 0, 2, 2, 1, 1, 2, 2, 1, 2, 1, 1, 1, 2, 2, 2, 1, 0, 1, 2, 1, 2, 1, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 1, 2, 2, 2, 1, 1, 1, 2, 2, 0, 2, 2, 1, 2, 0, 1, 1, 2, 2, 2, 0, 0, 2, 2, 1, 2, 2, 0, 1, 1, 2});
@@ -257,7 +264,7 @@ public class GA {
         double bestFitness = fitness[0];
 
         for (double fitness : fitness) {
-            if (compareFitness(bestFitness, fitness)) {
+            if (!compareFitness(bestFitness, fitness)) {
                 bestFitness = fitness;
             }
         }
@@ -267,6 +274,10 @@ public class GA {
 
 
     // ------------------------------------- Selection -------------------------------------
+
+    /**
+     * Uses some algorithm (might be random) to select individuals from the population to be parents
+     */
     private static Individual[] selection() throws Exception {
         return selection.select();
     }
@@ -301,7 +312,7 @@ public class GA {
     }
 
     /**
-     * The getParent() method returns a parent based on a prejudice
+     * The getParent() method returns a parent from the selected parents based on a prejudice
      */
     private static Individual getParent(Individual[] parentPopulation) throws Exception {
         return selection.getParent(parentPopulation);
@@ -415,23 +426,69 @@ public class GA {
         } else return false;
     }
 
+    /**
+     * NB: This method contains a lot of hard-coded values.
+     * It will not work adequately if:
+     * <ul>
+     *     <li> initial crossover probability is <= 0.2 </li>
+     *     <li> initial mutation probability is >= 0.79 </li>
+     * </ul>
+     */
     private static void changeCrossoverMutationProbability(int gen) {
         if (MAX_GENERATION >= 100) {
-            // 25% - decrease crossover probability
+            // at 25% - decrease crossover probability
             if (gen == (MAX_GENERATION / 4)) {
-                CROSSOVER_PROBABILITY = (CROSSOVER_PROBABILITY - 0.1 >= 0) ? (CROSSOVER_PROBABILITY - 0.1) : 0;
+                CROSSOVER_PROBABILITY = Math.max(CROSSOVER_PROBABILITY - 0.1, 0.2); // decrease by 0.1 (min is 0.2)
             }
 
-            // 50% - decrease crossover probability and increase mutation probability
+            // between 25% and 50% - replace 10% of the population with random individuals every third time
+            else if (gen > (MAX_GENERATION / 4) && gen < (MAX_GENERATION / 2) && gen % 3 == 0) {
+                replacePercentOfPopulation(10);
+            }
+
+            // at 50% - decrease crossover probability and increase mutation probability
             else if (gen == MAX_GENERATION / 2) {
-                CROSSOVER_PROBABILITY /= 2;
-                MUTATION_PROBABILITY = (MUTATION_PROBABILITY * 2 <= 1) ? (MUTATION_PROBABILITY * 2) : 1;
+                // These doesn't work well
+//                CROSSOVER_PROBABILITY /= 2; // halve it (min is 0.05)
+//                MUTATION_PROBABILITY = Math.min((MUTATION_PROBABILITY * 2), 0.89); // double it (max is 0.89)
+
+                CROSSOVER_PROBABILITY = CROSSOVER_PROBABILITY - 0.1; // decrease by 0.1 (min is 0.1)
+                MUTATION_PROBABILITY = Math.min((MUTATION_PROBABILITY + 0.1), 0.79); // increase by 0.1 (max is 0.79)
             }
 
-            // 75% - increase mutation probability
-            else if (gen == (MAX_GENERATION / 4) * 3) {
-                MUTATION_PROBABILITY = (MUTATION_PROBABILITY + 0.1 <= 1) ? (MUTATION_PROBABILITY + 0.1) : 1;
+            // between 50% and 75% - replace 20% of the population with random individuals every third time
+            else if (gen > (MAX_GENERATION / 2) && gen < (MAX_GENERATION / 4) * 3 && gen % 3 == 0) {
+                replacePercentOfPopulation(20);
             }
+
+            // at 75% - increase mutation probability
+            else if (gen == (MAX_GENERATION / 4) * 3) {
+                MUTATION_PROBABILITY += 0.1; // increase by 0.1 (max is 0.89)
+            }
+
+            // between 75% and 90% - replace 33% of the population with random individuals every third time
+            else if (gen > (MAX_GENERATION / 4) * 3 && gen < (MAX_GENERATION / 10) * 9 && gen % 3 == 0) {
+                replacePercentOfPopulation(33);
+            }
+
+            // at 90% - increase mutation probability
+            else if (gen == (MAX_GENERATION / 10) * 9) {
+                MUTATION_PROBABILITY = Math.min((MUTATION_PROBABILITY + 0.2), 0.99); // increase by 0.2 (max is 0.99)
+            }
+
+            // after 90% - replace half of the population with random individuals every third time until the end
+            else if (gen > (MAX_GENERATION / 10) * 9 && gen % 3 == 0) {
+                replacePercentOfPopulation(50);
+            }
+        }
+    }
+
+    // Replaces an APPROXIMATE percentage of the population with random individuals
+    private static void replacePercentOfPopulation(int percent) {
+        int amount = POPULATION_SIZE * percent / 100;
+        for (int i = 0; i < amount; i++) {
+            int randomIndex = (int) (Math.random() * POPULATION_SIZE);
+            population[randomIndex] = individualType.randomIndividual();
         }
     }
 }
