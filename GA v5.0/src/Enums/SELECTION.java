@@ -94,6 +94,8 @@ public enum SELECTION {
         }
     };
 
+
+    // ------------------------------------- Methods -------------------------------------
     public Individual[] select() throws Exception {
         throw new Exception("Not implemented");
     }

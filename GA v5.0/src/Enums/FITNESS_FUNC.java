@@ -151,6 +151,7 @@ public enum FITNESS_FUNC {
         }
     };
 
+    // ------------------------------------- Methods -------------------------------------
     public MIN_MAX getMinMax() throws Exception {
         throw new Exception("Not implemented");
     }

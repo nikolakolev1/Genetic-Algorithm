@@ -134,7 +134,7 @@ public class Check {
                 return true; // I have no time to implement it rignt now
             }
             default -> {
-                return true;
+                return false;
             }
         }
     }

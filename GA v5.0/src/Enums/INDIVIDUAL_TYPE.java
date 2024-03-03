@@ -16,12 +16,28 @@ public enum INDIVIDUAL_TYPE {
         public Individual[] randomPopulation() {
             return randPopulation_Normal();
         }
+
+        @Override
+        public void print(Individual individual) {
+            for (boolean bit : individual.individualB) {
+                System.out.print(bit ? "1" : "0");
+            }
+            System.out.println();
+        }
     },
 
     intArray {
         @Override
         public Individual[] randomPopulation() {
             return randPopulation_Normal();
+        }
+
+        @Override
+        public void print(Individual individual) {
+            for (int bit : individual.individualI) {
+                System.out.print(bit + " ");
+            }
+            System.out.println();
         }
     },
 
@@ -30,12 +46,28 @@ public enum INDIVIDUAL_TYPE {
         public Individual[] randomPopulation() {
             return randPopulation_Tsp();
         }
+
+        @Override
+        public void print(Individual individual) {
+            for (int bit : individual.individualI) {
+                System.out.print(bit + " ");
+            }
+            System.out.println();
+        }
     },
 
     fttxIntArray {
         @Override
         public Individual[] randomPopulation() {
             return randPopulation_FTTx();
+        }
+
+        @Override
+        public void print(Individual individual) {
+            for (int bit : individual.individualI) {
+                System.out.print(bit + " ");
+            }
+            System.out.println();
         }
     },
 
@@ -44,8 +76,18 @@ public enum INDIVIDUAL_TYPE {
         public Individual[] randomPopulation() {
             return randPopulation_AOC();
         }
+
+        @Override
+        public void print(Individual individual) {
+            for (int bit : individual.individualI) {
+                System.out.print(bit);
+            }
+            System.out.println();
+        }
     };
 
+
+    // ------------------------------------- Methods -------------------------------------
     public Individual[] randomPopulation() throws Exception {
         throw new Exception("Not implemented");
     }
@@ -118,5 +160,9 @@ public enum INDIVIDUAL_TYPE {
         }
 
         return population;
+    }
+
+    public void print(Individual individual) throws IllegalStateException {
+        throw new IllegalStateException("Not implemented");
     }
 }

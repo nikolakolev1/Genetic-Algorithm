@@ -58,6 +58,7 @@ public enum CROSSOVER {
         }
     };
 
+    // ------------------------------------- Methods -------------------------------------
     public Individual[] crossoverIndividuals(Individual parent1, Individual parent2) throws Exception {
         throw new Exception("Not implemented");
     }

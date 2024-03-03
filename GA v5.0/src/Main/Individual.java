@@ -64,26 +64,6 @@ public class Individual {
     }
 
     public void print() {
-        switch (arrayType) {
-            case boolArray -> {
-                for (boolean bit : individualB) {
-                    System.out.print(bit ? "1" : "0");
-                }
-                System.out.println();
-            }
-            case intArray, tspIntArray, fttxIntArray -> {
-                for (int bit : individualI) {
-                    System.out.print(bit + " ");
-                }
-                System.out.println();
-            }
-            case aocIntArray -> {
-                for (int bit : individualI) {
-                    System.out.print(bit);
-                }
-                System.out.println();
-            }
-            default -> throw new IllegalStateException("Unexpected value: " + arrayType);
-        }
+        arrayType.print(this);
     }
 }

@@ -60,6 +60,8 @@ public enum MUTATION {
         }
     };
 
+
+    // ------------------------------------- Methods -------------------------------------
     public void mutation(Individual[] offspringPopulation) {
     }
 
