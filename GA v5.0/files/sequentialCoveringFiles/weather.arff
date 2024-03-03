@@ -1,0 +1,21 @@
+@relation weather
+
+@attribute outlook {sunny, overcast, rain}
+@attribute windy {true, false}
+@attribute play {yes, no}
+
+@data
+sunny,true,yes
+sunny,true,no
+sunny,false,no
+sunny,false,no
+sunny,false,yes
+overcast,true,yes
+overcast,false,yes
+overcast,true,yes
+overcast,false,yes
+rain,true,no
+rain,true,no
+rain,false,yes
+rain,false,yes
+rain,false,yes
