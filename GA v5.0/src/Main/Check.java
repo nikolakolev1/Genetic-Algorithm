@@ -118,6 +118,9 @@ public class Check {
 
     private static boolean checkProblemProvided() {
         switch (GA.fitnessFunc) {
+            case MostBitsOn, LeastBitsOn -> {
+                return true;
+            }
             case QuadEquationBoolArray -> {
                 return Equation.valuesAtPoints != null;
             }
