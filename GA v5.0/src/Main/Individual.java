@@ -66,4 +66,51 @@ public class Individual {
     public void print() {
         arrayType.print(this);
     }
+
+    /**
+     * Calculates the similarity between this individual and another individual.
+     * Similarity is the proportion of matching elements in the individuals' arrays.
+     * Throws an exception if the individuals are not of the same type or have different lengths.
+     *
+     * @param anotherIndividual the other individual to compare with this individual
+     * @return the similarity between this individual and anotherIndividual as a percentage
+     * @throws IllegalArgumentException if the two individuals are not of the same type or have different lengths
+     * @throws IllegalStateException if the individuals' array type is not supported
+     */
+    public double similarity(Individual anotherIndividual) {
+        // Check if the two individuals are of the same type
+        if (arrayType != anotherIndividual.arrayType) {
+            throw new IllegalArgumentException("The two individuals are not of the same type");
+        }
+
+        // Check if the two individuals have the same length
+        if (length != anotherIndividual.length) {
+            throw new IllegalArgumentException("The two individuals have different lengths");
+        }
+
+        // If checks pass, calculate the similarity
+        int count = 0;
+
+        switch (arrayType) {
+            case boolArray -> {
+                for (int i = 0; i < length; i++) {
+                    if (individualB[i] == anotherIndividual.individualB[i]) {
+                        count++;
+                    }
+                }
+            }
+
+            case intArray, tspIntArray -> {
+                for (int i = 0; i < length; i++) {
+                    if (individualI[i] == anotherIndividual.individualI[i]) {
+                        count++;
+                    }
+                }
+            }
+
+            default -> throw new IllegalStateException("Unexpected value: " + arrayType);
+        }
+
+        return ((double) count / length) * 100;
+    }
 }
