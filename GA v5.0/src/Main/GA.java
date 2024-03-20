@@ -506,10 +506,18 @@ public class GA {
 
     // Replaces an APPROXIMATE percentage of the population with random individuals
     private static void replacePercentOfPopulation(int percent) {
-        int amount = POPULATION_SIZE * percent / 100;
+        // Create a list of indexes of the population and shuffle it
+        // (that is done to ensure we replace different individuals each time)
+        List<Integer> indexes = new ArrayList<>();
+        for (int i = 0; i < POPULATION_SIZE; i++) {
+            indexes.add(i);
+        }
+        Collections.shuffle(indexes);
+
+        // Replace the first x individuals with random individuals (where x = percent of the population)
+        int amount = (POPULATION_SIZE * percent) / 100;
         for (int i = 0; i < amount; i++) {
-            int randomIndex = (int) (Math.random() * POPULATION_SIZE);
-            population[randomIndex] = individualType.randomIndividual();
+            population[indexes.get(i)] = individualType.randomIndividual();
         }
     }
 }
