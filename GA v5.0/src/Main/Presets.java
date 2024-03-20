@@ -152,7 +152,7 @@ public class Presets {
             }
         }
 
-        GA.setSettings(size, 800, 20, 2000, 0.9, 0.25);
+        GA.setSettings(size, 1000, 5, 1500, 0.85, 0.25);
     }
 
     private static void ftxPopulation() throws Exception {
