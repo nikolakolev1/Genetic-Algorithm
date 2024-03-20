@@ -355,6 +355,7 @@ public class GA {
 
 
     // ------------------------------------- Elitism -------------------------------------
+    // Records the elite individuals from the current population (in the oldPopulationSorted list)
     private static void recordElite() throws Exception {
         if (population[0].fitness == null) throw new Exception("Fitness not calculated");
 
@@ -368,6 +369,7 @@ public class GA {
         });
     }
 
+    // Reintroduces x elite individuals into the new population (where x = eliteIndividualsCount)
     private static void reintroduceElite() throws Exception {
         for (int i = 0; i < eliteIndividualsCount; i++) {
             // choose a random individual from the new population
@@ -450,6 +452,7 @@ public class GA {
 
 
     // ------------------------------------- Other -------------------------------------
+    // Resets all global variables to their initial state
     private static void resetGlobals() {
         population = null;
         fitness = null;
@@ -468,6 +471,7 @@ public class GA {
     }
 
     private static boolean terminationConditionMet() {
+        // If the best fitness of the population == the termination condition fitness => the termination condition is met
         if (populationBestFitness() == terminationConditionFitness) {
             System.out.println("Termination condition met");
             return true;
