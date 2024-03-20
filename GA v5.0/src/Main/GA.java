@@ -3,16 +3,14 @@ package Main;
 import Enums.*;
 import Problems.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.*;
 
 import static Main.Check.checkEverything;
 import static Main.Presets.preset;
 
 // Author: Nikola Kolev
-// Date: 05.11.2023
-// Version: 3.0
+// Date: 20.03.2024
+// Version: 5.0
 
 /**
  * <p>
@@ -39,13 +37,13 @@ public class GA {
 
     // ------------------------------------- Elitism -------------------------------------
     public static boolean elitism;
-    private static ArrayList<Individual> oldPopulationSorted;
+    private static List<Individual> oldPopulationSorted;
     private static final int eliteIndividualsCount = 2;
 
 
     // ------------------------------------- Tournament sel - Ensure all selected become parents -------------------------------------
     public static boolean everyoneWasParent = false;
-    public static HashSet<Integer> parents = new HashSet<>();
+    public static Set<Integer> parents = new HashSet<>();
 
 
     // ------------------------------------- Settings -------------------------------------
@@ -69,7 +67,7 @@ public class GA {
     // ------------------------------------- Global population -------------------------------------
     public static Individual[] population;
     public static double[] fitness;
-    public static ArrayList<Double> prejudice;
+    public static List<Double> prejudice;
     public static Individual bestIndividual_EntireRun;
 
 
