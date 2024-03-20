@@ -83,8 +83,10 @@ public class GA {
 
     // ------------------------------------- Methods -------------------------------------
     public static void main(String[] args) {
+        long startTime = System.nanoTime();
+
         try {
-            for (int testNo = 0; testNo < 10; testNo++) {
+            for (int testNo = 0; testNo < 1; testNo++) {
                 // Set all the switches and settings for the Main.GA to run
                 // (I suggest using presets or the setSwitches() and setSettings() methods)
                 preset("TspTorTspPmxExcNoeTs2"); // BolTorMboSinUnfEltMed | BolTorLboSinUnfEltMed | BolTorQdeSinUnfEltQde | TspTorTspPmxInvEltTsp | FtxTorNvpFtxAriEltFtx | AocTorAocFtxAriEltAoc
@@ -106,6 +108,9 @@ public class GA {
             System.out.println(e.getMessage());
             e.printStackTrace();
         }
+
+        long endTime = System.nanoTime();
+        System.out.println("\nExecution time: " + (endTime - startTime) / 1e6 + " ms");
     }
 
     /**
