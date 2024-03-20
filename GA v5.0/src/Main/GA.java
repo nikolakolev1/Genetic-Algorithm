@@ -71,6 +71,11 @@ public class GA {
     public static Individual bestIndividual_EntireRun;
 
 
+    // ------------------------------------- Similarity -------------------------------------
+    private static double[][] similarityMatrix; // similarity between each pair of individuals
+    private static double[] similarityArray; // overall similarity of each individual to the rest of the population
+
+
     // ------------------------------------- Other -------------------------------------
     public static int nPointCrossoverPoints;
     private static final double terminationConditionFitness = -1;
@@ -113,7 +118,7 @@ public class GA {
      * 6. Termination check
      */
     private static void runGA() throws Exception {
-        for (int gen = 0; gen < MAX_GENERATION; gen++) {
+        for (int genNo = 0; genNo < MAX_GENERATION; genNo++) {
             Individual[] selected = selection(); // selection
             population = evolution(selected); // crossover and mutation
 
@@ -123,17 +128,15 @@ public class GA {
 
             // Must do this at the end of each generation
             recordBestIndividual_EntireRun();
-            Print.generationStats(gen + 1); // if (fitnessFunc != FITNESS_FUNC.Problems.SequentialCovering) Main.Print.generationStats(gen + 1);
+            Print.generationStats(genNo + 1); // if (fitnessFunc != FITNESS_FUNC.Problems.SequentialCovering) Main.Print.generationStats(genNo + 1);
 
             // Termination condition
             if (terminationConditionMet()) break;
 
             /*
-             * PLAYING AROUND: decrease crossover, increase mutation, and introduce random individuals
-             * Unfortunately, this doesn't work as well as I thought it would.
-             * I've been playing around with it with the Ts2 population, with the following preset: TspTorTspPmxExcNoeTs2
+             * PLAYING AROUND: I've been playing around with it and the Ts2 population, with the following preset: TspTorTspPmxExcNoeTs2
              */
-            changeCrossoverMutationProbability(gen);
+            if (genNo % 3 == 0) decreasePopulationSimilarity();
         }
     }
 
@@ -399,6 +402,48 @@ public class GA {
     }
 
 
+    // ------------------------------------- Similarity -------------------------------------
+    private static void updateSimilarity() {
+        updateSimilarityMatrix();
+        updateSimilarityArray();
+    }
+
+    // Updates the similarity matrix with the similarity between each pair of individuals
+    private static void updateSimilarityMatrix() {
+        if (similarityMatrix == null) initialiseSimilarityMatrix();
+
+        // calculate the similarity between each pair of individuals
+        for (int i = 0; i < POPULATION_SIZE; i++) {
+            for (int j = i + 1; j < POPULATION_SIZE; j++) {
+                similarityMatrix[i][j] = similarityMatrix[j][i] = population[i].similarity(population[j]);
+            }
+        }
+    }
+
+    private static void initialiseSimilarityMatrix() {
+        similarityMatrix = new double[POPULATION_SIZE][POPULATION_SIZE];
+    }
+
+    // Updates the similarity array with the average similarity of each individual compared to all other individuals
+    private static void updateSimilarityArray() {
+        if (similarityArray == null) initialiseSimilarityArray();
+
+        // calculate the average similarity of each individual to all other individuals
+        for (int i = 0; i < POPULATION_SIZE; i++) {
+            similarityArray[i] = Arrays.stream(similarityMatrix[i]).sum() / POPULATION_SIZE;
+        }
+    }
+
+    private static void initialiseSimilarityArray() {
+        similarityArray = new double[POPULATION_SIZE];
+    }
+
+    // Returns the average similarity of the population (using the similarityArray => must be called after updateSimilarityArray())
+    private static double averageSimilarity() {
+        return Arrays.stream(similarityArray).sum() / POPULATION_SIZE;
+    }
+
+
     // ------------------------------------- Other -------------------------------------
     private static void resetGlobals() {
         population = null;
@@ -424,61 +469,30 @@ public class GA {
         } else return false;
     }
 
-    /**
-     * NB: This method contains a lot of hard-coded values.
-     * It will not work adequately if:
-     * <ul>
-     *     <li> initial crossover probability is <= 0.2 </li>
-     *     <li> initial mutation probability is >= 0.79 </li>
-     * </ul>
-     */
-    private static void changeCrossoverMutationProbability(int gen) {
-        if (MAX_GENERATION >= 100) {
-            // at 25% - decrease crossover probability
-            if (gen == (MAX_GENERATION / 4)) {
-                CROSSOVER_PROBABILITY = Math.max(CROSSOVER_PROBABILITY - 0.1, 0.2); // decrease by 0.1 (min is 0.2)
-            }
+    // NB: This method contains a lot of hard-coded values.
+    private static void decreasePopulationSimilarity() {
+        updateSimilarity();
+        double averageSimilarity = averageSimilarity();
 
-            // between 25% and 50% - replace 10% of the population with random individuals every third time
-            else if (gen > (MAX_GENERATION / 4) && gen < (MAX_GENERATION / 2) && gen % 3 == 0) {
-                replacePercentOfPopulation(10);
-            }
-
-            // at 50% - decrease crossover probability and increase mutation probability
-            else if (gen == MAX_GENERATION / 2) {
-                // These doesn't work well
-//                CROSSOVER_PROBABILITY /= 2; // halve it (min is 0.05)
-//                MUTATION_PROBABILITY = Math.min((MUTATION_PROBABILITY * 2), 0.89); // double it (max is 0.89)
-
-                CROSSOVER_PROBABILITY = CROSSOVER_PROBABILITY - 0.1; // decrease by 0.1 (min is 0.1)
-                MUTATION_PROBABILITY = Math.min((MUTATION_PROBABILITY + 0.1), 0.79); // increase by 0.1 (max is 0.79)
-            }
-
-            // between 50% and 75% - replace 20% of the population with random individuals every third time
-            else if (gen > (MAX_GENERATION / 2) && gen < (MAX_GENERATION / 4) * 3 && gen % 3 == 0) {
-                replacePercentOfPopulation(20);
-            }
-
-            // at 75% - increase mutation probability
-            else if (gen == (MAX_GENERATION / 4) * 3) {
-                MUTATION_PROBABILITY += 0.1; // increase by 0.1 (max is 0.89)
-            }
-
-            // between 75% and 90% - replace 33% of the population with random individuals every third time
-            else if (gen > (MAX_GENERATION / 4) * 3 && gen < (MAX_GENERATION / 10) * 9 && gen % 3 == 0) {
-                replacePercentOfPopulation(33);
-            }
-
-            // at 90% - increase mutation probability
-            else if (gen == (MAX_GENERATION / 10) * 9) {
-                MUTATION_PROBABILITY = Math.min((MUTATION_PROBABILITY + 0.2), 0.99); // increase by 0.2 (max is 0.99)
-            }
-
-            // after 90% - replace half of the population with random individuals every third time until the end
-            else if (gen > (MAX_GENERATION / 10) * 9 && gen % 3 == 0) {
-                replacePercentOfPopulation(50);
-            }
+        if (averageSimilarity <= 33) {
+            replacePercentOfPopulation(10);
+        } else if (averageSimilarity > 33 && averageSimilarity <= 50) {
+            replacePercentOfPopulation(35);
+        } else if (averageSimilarity > 50 && averageSimilarity <= 60) {
+            replacePercentOfPopulation(40);
+        } else if (averageSimilarity > 60 && averageSimilarity <= 70) {
+            replacePercentOfPopulation(45);
+        } else if (averageSimilarity > 70 && averageSimilarity <= 80) {
+            replacePercentOfPopulation(55);
+        } else if (averageSimilarity > 80 && averageSimilarity <= 90) {
+            replacePercentOfPopulation(66);
+        } else if (averageSimilarity > 90 && averageSimilarity <= 95) {
+            replacePercentOfPopulation(80);
+        } else if (averageSimilarity > 95) {
+            replacePercentOfPopulation(95);
         }
+
+//        System.out.println("Average similarity: " + averageSimilarity);
     }
 
     // Replaces an APPROXIMATE percentage of the population with random individuals
