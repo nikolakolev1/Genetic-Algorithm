@@ -61,4 +61,15 @@ public class Print {
         if (GA.elitism) System.out.println(", with Elitism turned on.");
         else System.out.println(".");
     }
+
+    public static void printSimilarityMatrix(int[][] similarityMatrix) {
+        int size = similarityMatrix.length;
+
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                System.out.print(similarityMatrix[i][j] + " ");
+            }
+            System.out.println();
+        }
+    }
 }
