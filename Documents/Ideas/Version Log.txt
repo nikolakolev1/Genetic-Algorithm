@@ -1,8 +1,14 @@
 v4 to v5
 - tackle premature convergence
+	- similarity based decisions
+		- similarity matrix and array in the GA class
+		- average population similarity method in the GA class
+		- similarity between cities matrix inside the tspProblem class
+			- a number between 0 and 1 where 1 is the same city
+			- currently (as of 21.03.24) everything except for the actual coty is 0.
+			  Adjusting that to give some similarity to close by cities would produce
+				a more accurate similarity calculation in the GA class
 
 v5 to v6
-- continue tackling premature convergence
-	- similarity based decisions
 - change methods from static to normal
 	- try introducing concurrency with multiple GA objects running in parallel
