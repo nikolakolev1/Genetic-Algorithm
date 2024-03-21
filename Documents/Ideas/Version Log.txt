@@ -8,6 +8,7 @@ v4 to v5
 			- currently (as of 21.03.24) everything except for the actual city is 0.
 			  Adjusting that to give some similarity to close by cities would produce
 				a more accurate similarity calculation in the GA class
+- convert tsp individuals to have the same starting city (the first bit in the arr)
 
 v5 to v6
 - change methods from static to normal
