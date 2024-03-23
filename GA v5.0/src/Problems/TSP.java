@@ -5,6 +5,10 @@ import Main.GA;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class TSP {
     /**
@@ -18,6 +22,7 @@ public class TSP {
     public static int[] costArray = new int[]{2, 7, 4, 11, 1, 17, 11, 3, 4, 9, 4, 13, 12, 3, 5, 7, 2, 14, 5, 4, 22, 15, 6, 8, 16, 10, 18, 1};
     public static String filename = "files/tspFiles/dantzig.tsp"; // groetschel.tsp & dantzig.tsp
     public static int[][] costMatrix; // Either use TspCostArray or TspFilename to create the TspCostMatrix
+    public static int[][] similarityMatrix;
     protected static int SIZE;
 
     /**
@@ -110,14 +115,44 @@ public class TSP {
         } catch (IOException e) {
             throw new RuntimeException("Could not load file: " + filename, e);
         }
+
+        createSimilarityMatrix();
     }
 
-    private static void printMatrix() {
+    // TODO: Finish working on that
+    private static void createSimilarityMatrix() {
+        similarityMatrix = new int[SIZE][SIZE];
+
+        for (int thisCityIndex = 0; thisCityIndex < SIZE; thisCityIndex++) {
+            List<Integer> citiesCostsList = new ArrayList<>();
+            Map<Integer, Integer> citiesCostsToIndexesMap = new HashMap<>();
+
+            for (int otherCityIndex = 0; otherCityIndex < SIZE; otherCityIndex++) {
+                citiesCostsList.add(costMatrix[thisCityIndex][otherCityIndex]);
+                citiesCostsToIndexesMap.put(costMatrix[thisCityIndex][otherCityIndex], otherCityIndex);
+            }
+
+            citiesCostsList.sort(Integer::compareTo);
+
+            for (int i = 0; i < SIZE; i++) {
+                similarityMatrix[thisCityIndex][i] = citiesCostsToIndexesMap.get(citiesCostsList.get(i));
+            }
+        }
+
+        // TODO: Test, after implementing the printSimilarityMatrix method
+        printSimilarityMatrix();
+    }
+
+    private static void printCostMatrix() {
         for (int y = 0; y < costMatrix.length; y++) {
             for (int[] tspMatrix : costMatrix) {
                 System.out.print(tspMatrix[(costMatrix.length - 1) - y] + " ");
             }
             System.out.println();
         }
+    }
+
+    private static void printSimilarityMatrix() {
+        // TODO: Implement this method
     }
 }
